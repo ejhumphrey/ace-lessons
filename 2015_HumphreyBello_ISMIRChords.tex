@@ -46,7 +46,14 @@
 \maketitle
 %
 \begin{abstract}
-The abstract should be placed at the top left column and should contain about 150-200 words.
+This work considers the task of large vocabulary automatic chord estimation (ACE).
+Apply a deep convolutional neural network designed specifically for root-invariance, largest collection to date.
+Advances the state of the art, high fives all around.
+However, the focus then shifts to error analysis in an effort to understand where to go from here.
+Using multiple models and multiple annotators, we show that the differences between these systems are largely irrelevant, the notion of ``expert ground truth'' is tenuous at best, and that ACE may have reached a glass ceiling given its current problem formulation.
+Based on these findings, the chord estimation task is reassessed and possible directions for the future are discussed.
+
+
 \end{abstract}
 %
 \section{Introduction}\label{sec:introduction}
@@ -61,11 +68,11 @@ This template can be downloaded from the ISMIR \conferenceyear\ web site (\textt
 %
 \section{Paper Length}
 \textcolor{red}{The regulations for the maximal paper length have changed.}
-Instead of the strict limit of six pages (as used for ISMIR 2014), we adopt 
-a ``(6+1)-page policy'' for ISMIR 2015. This means, the paper may have a 
-maximum of 6 pages for technical content including figures and possible references 
+Instead of the strict limit of six pages (as used for ISMIR 2014), we adopt
+a ``(6+1)-page policy'' for ISMIR 2015. This means, the paper may have a
+maximum of 6 pages for technical content including figures and possible references
 with one additional optional 7th page containing only references.
-Note that this is a strict requirement. 
+Note that this is a strict requirement.
 \textcolor{red}{The seventh page (if used at all) must
 not contain any other material except for references.}
 
@@ -172,22 +179,29 @@ Figures and tables may extend across both columns to a maximum width of 17.2cm.
  \label{fig:example}
 \end{figure}
 
-\section{Equations}
+\section{Summary}
 
-Equations should be placed on separate lines and numbered.
-The number should be on the right side, in parentheses, as in \eqnref{relativity}.
+In this work, the application of deep learning to large-vocabulary ACE is thoroughly explored, realizing competitive performance using standard evaluation methods.
+Arguably of more importance, both the behavior of the resulting systems and the data used for development are explored in rigorous detail.
+Our results show that the state of the art may have truly hit a glass ceiling, due to the conventional assumption that ``ground truth'' data can be obtained for what is, at times, an unavoidably subjective task.
+This challenge is further compounded by approaches to prediction and evaluation, which attempt to perform flat classification of a hierarchically structured chord taxonomy.
+Thus, while there certainly remains room for improvement, error analysis indicates that the vast majority of error in modern chord recognition systems is a result of invalid assumptions baked into the very question being asked.
 
-\begin{equation}\label{relativity}
-E=mc^{2}
-\end{equation}
+Notably, four issues with current chord estimation methodology have been identified in this work.
+One, it seems necessary that computational models, and especially those that estimate a large number of chord types, embrace structured outputs;
+one-of-$K$ class encoding schemes introuduce unnecessary complexity between what are naturally hierarchical relationships.
+Two, there is value in distinguish between the two tasks at hand, being chord recognition ---I am playing this \emph{exact} chord shape on guitar--- and chord transcription ---finding the best chord label to describe this harmonically homogenous region of music--- and how this intent is conveyed to the authors of reference annotations.
+Three, as championed by \cite{Mauch}, chord transcription would certainly seem to benefit from explicit segmentation, rather than letting such boundaries between regions of harmonic stability result implicitly from post-filtering algorithms, i.e. Viterbi.
+Lastly, the all-too-often subjective nature of chord labeling needs to be acknowledged in the process of curating reference data, and the human labeling task should average or combine multiple perspectives rather than attempt to yield canonical ``expert'' references.
 
-\section{Citations}
 
-All bibliographical references should be listed at the end,
-inside a section named ``REFERENCES,'' numbered and in alphabetical order.
-All references listed should be cited in the text.
-When referring to a document, type the number in square brackets
-\cite{Author:00}, or for a range \cite{Author:00,Someone:10,Someone:04}.
+% \section{Citations}
+
+% All bibliographical references should be listed at the end,
+% inside a section named ``REFERENCES,'' numbered and in alphabetical order.
+% All references listed should be cited in the text.
+% When referring to a document, type the number in square brackets
+% \cite{Author:00}, or for a range \cite{Author:00,Someone:10,Someone:04}.
 
 % For bibtex users:
 \bibliography{ISMIR2015template}
