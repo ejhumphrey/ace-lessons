@@ -10,15 +10,7 @@
 
 % Title.
 % ------
-\title{Paper Template For ISMIR \conferenceyear}
-
-
-% Single address
-% To use with only one author or several with the same address
-% ---------------
-%\oneauthor
-% {Names should be omitted for double-blind reviewing}
-% {Affiliations should be omitted for double-blind reviewing}
+\title{Four Difficult Lessons on Automatic Chord Estimation}
 
 % Two addresses
 % --------------
@@ -29,29 +21,26 @@
 % Three addresses
 % --------------
 \threeauthors
-  {First author} {Affiliation1 \\ {\tt author1@ismir.edu}}
+  {First author} {Affiliation1 \\ {\tt author1@ismir.net}}
   {Second author} {\bf Retain these fake authors in\\\bf submission to preserve the formatting}
-  {Third author} {Affiliation3 \\ {\tt author3@ismir.edu}}
+  {Third author} {Affiliation3 \\ {\tt author3@ismir.net}}
 
-% Four addresses
-% --------------
-%\fourauthors
-%  {First author} {Affiliation1 \\ {\tt author1@ismir.edu}}
-%  {Second author}{Affiliation2 \\ {\tt author2@ismir.edu}}
-%  {Third author} {Affiliation3 \\ {\tt author3@ismir.edu}}
-%  {Fourth author} {Affiliation4 \\ {\tt author4@ismir.edu}}
 
 \begin{document}
 %
 \maketitle
 %
 \begin{abstract}
-This work considers the task of large vocabulary automatic chord estimation (ACE).
-Apply a deep convolutional neural network designed specifically for root-invariance, largest collection to date.
-Advances the state of the art, high fives all around.
-However, the focus then shifts to error analysis in an effort to understand where to go from here.
-Using multiple models and multiple annotators, we show that the differences between these systems are largely irrelevant, the notion of ``expert ground truth'' is tenuous at best, and that ACE may have reached a glass ceiling given its current problem formulation.
-Based on these findings, the chord estimation task is reassessed and possible directions for the future are discussed.
+
+Automatic chord estimation (ACE) is now a hallmark research topic in content-based music informatics, but like many other tasks, system performance appears to be converging to yet another glass ceiling.
+Recently, two different large-vocabulary ACE systems were developed in the hopes that complex, data-driven models might significantly advance the state of the art.
+While arguably achieving some of the highest results to date, both approaches plateau at the same level, well short of having solved the problem.
+Therefore, this work explores the behavior of these two systems as a means of understanding obstacles and limitations in chord estimation, arriving at four difficult lessons:
+one, music recordings that invalidate tacit assumptions about harmony and tonality result in erroneous and even misleading performance;
+two, standard lexicons and comparison methods struggle to reflect the natural relationships between chords;
+three, conventional approaches conflate the competing goals of recognition and transcription to some undefined degree;
+and four, the perception of chords in real music can be highly subjective, making the very notion of ``ground truth'' annotations tenuous.
+Synthesizing these observations, this paper offers possible remedies going forward, and concludes with some perspectives on the future of ACE research.
 
 
 \end{abstract}
@@ -65,8 +54,9 @@ style file (\LaTeX) or template (Word).
 If you have any questions, please contact the Program Committee
 (\texttt{ismir\conferenceyear-papers@ismir.net}).
 This template can be downloaded from the ISMIR \conferenceyear\ web site (\texttt{http://ismir\conferenceyear.ismir.net}).
-%
-\section{Paper Length}
+
+
+\section{Methodology}
 \textcolor{red}{The regulations for the maximal paper length have changed.}
 Instead of the strict limit of six pages (as used for ISMIR 2014), we adopt
 a ``(6+1)-page policy'' for ISMIR 2015. This means, the paper may have a
@@ -75,6 +65,10 @@ with one additional optional 7th page containing only references.
 Note that this is a strict requirement.
 \textcolor{red}{The seventh page (if used at all) must
 not contain any other material except for references.}
+
+\subsection{Automatic Systems}
+
+
 
 \section{Page Size}\label{sec:page_size}
 
@@ -181,7 +175,7 @@ Figures and tables may extend across both columns to a maximum width of 17.2cm.
 
 \section{Summary}
 
-In this work, the application of deep learning to large-vocabulary ACE is thoroughly explored, realizing competitive performance using standard evaluation methods.
+In this work, the application of deep learning to large-vocabulary ACE is thoroughly explored, advancing the state of the art using standard evaluation methods.
 Arguably of more importance, both the behavior of the resulting systems and the data used for development are explored in rigorous detail.
 Our results show that the state of the art may have truly hit a glass ceiling, due to the conventional assumption that ``ground truth'' data can be obtained for what is, at times, an unavoidably subjective task.
 This challenge is further compounded by approaches to prediction and evaluation, which attempt to perform flat classification of a hierarchically structured chord taxonomy.
