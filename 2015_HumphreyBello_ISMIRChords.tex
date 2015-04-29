@@ -47,30 +47,45 @@ Synthesizing these observations, this paper offers possible remedies going forwa
 %
 \section{Introduction}\label{sec:introduction}
 
-This template includes all the information about formatting manuscripts for the ISMIR \conferenceyear\ Conference.
-Please follow these guidelines to give the final proceedings a uniform look.
-Most of the required formatting is achieved automatically by using the supplied
-style file (\LaTeX) or template (Word).
-If you have any questions, please contact the Program Committee
-(\texttt{ismir\conferenceyear-papers@ismir.net}).
-This template can be downloaded from the ISMIR \conferenceyear\ web site (\texttt{http://ismir\conferenceyear.ismir.net}).
+
 
 
 \section{Methodology}
-\textcolor{red}{The regulations for the maximal paper length have changed.}
-Instead of the strict limit of six pages (as used for ISMIR 2014), we adopt
-a ``(6+1)-page policy'' for ISMIR 2015. This means, the paper may have a
-maximum of 6 pages for technical content including figures and possible references
-with one additional optional 7th page containing only references.
-Note that this is a strict requirement.
-\textcolor{red}{The seventh page (if used at all) must
-not contain any other material except for references.}
+
+Thirteen chord qualities, given in Table \ref{tab:qualities}, in all twelve pitch classes and one no-chord class are considered for a total of 157 chord classes.
+Having all four datasets at hand, these collections are merged into the largest collection of chord transcriptions used to date, totaling 1235 tracks.
+Given that the collections were curated in isolation of each other, it is a necessary first step to identify and remove duplicates to avoid data contamination during cross validation.
+To these ends, each recording is checked against the EchoNest Analyze API\footnote{http://developer.echonest.com/docs/v4} and associated with its track and song identifiers, corresponding to the recording and work, respectively.
+Though multiple track IDs will map to the same song ID, uniqueness is defined at the level of a song to ensure duplicates are removed.
+This identifies 18 redundant songs, and all but one is dropped for each collision from the total collection, resulting in a final count of 1217 unique tracks.
+
 
 \subsection{Automatic Systems}
 
+For algorithmic parity, two systems are considered here having adopted the same output chord prediction space and trained over the same data splits.
 
 
-\section{Page Size}\label{sec:page_size}
+\subsubsection{K-stream GMM-HMM with Multiband Chroma}
+
+Following the lineage of automatic chord estimation systems, one system considered is that of \cite{Cho2014Improved}.
+A multiband chroma representation is computed from beat-synchronous audio analysis, producing four parallel chroma features.
+Each is fit to a separate Gaussian Mixture Model (GMM) by rotating all chroma vectors and chord labels to C.
+During inference, four separate observation likelihoods over all chord classes are obtained by circularly rotating the feature vector the GMM.
+These four posteriors are then decoded jointly, using a k-stream HMM, resulting in a beat-aligned chord sequence.
+In addition to being one of the highest performing systems at a recent iteration of MIReX, a software implementation was obtained, thereby enabling experimental consistency between partitions of the training data.
+
+
+\subsubsection{Deep Convolutional Neural Network}
+
+Acknowledging both the limited representational power of GMMs and a similar trend that occurred in automatic speech recognition, a deep convolutional network is also considered \cite{Humphrey2015Fully}.
+Time-frequency patches of local contrast normalized constant-Q spectra, on the order of one second, are transformed by a fully-convolutional network.
+Finding inspiration in the root-invariance strategy of GMM training, explicit weight-tying is achieved across roots such that all qualities develop the same internal representations, allowing the model to generalize to chords unseen during.
+
+
+
+
+
+\section{Performance Analysis}\label{sec:page_size}
 
 The proceedings will be printed on
  \underline{portrait A4-size paper} \underline{(21.0cm x 29.7cm)}.
@@ -82,34 +97,98 @@ The text should be in two 8.2cm columns with a 0.8cm gutter.
 All text must be in a two-column format.
 Text must be fully justified.
 
-\section{Typeset Text}\label{sec:typeset_text}
 
-\subsection{Normal or Body Text}\label{subsec:body}
 
-Please use a 10pt (point) Times font. Sans-serif or non-proportional fonts
-can be used only for special purposes, such as distinguishing source code text.
 
-The first paragraph in each section should not be indented, but all other paragraphs should be.
+\section{Observations}\label{sec:typeset_text}
 
-\subsection{Title and Authors}
+Based on this analysis, a handful of instances are pulled out of the data and inspected more closely.
 
-The title is 14pt Times, bold, caps, upper case, centered.
-Authors' names are omitted when submitting for double-blind reviewing.
-The following is for making a camera-ready version.
-Authors' names are centered.
-The lead author's name is to be listed first (left-most), and the co-authors' names after.
-If the addresses for all authors are the same, include the address only once, centered.
-If the authors have different addresses, put the addresses, evenly spaced, under each authors' name.
 
-\subsection{First Page Copyright Notice}
+\subsection{Assumptions on Tonality}\label{subsec:body}
 
-Please include the copyright notice exactly as it appears here in the lower left-hand corner of the page.
-It is set in 8pt Times.
+Not all music is well described by chords.
+Because you \emph{can} annotate chords in a song, doesn't mean you should.
+Revolution 9, Beastie Boys, Fugees.
+These are not well described by chords, and introduce noise in the evaluation process.
 
-\subsection{Page Numbering, Headers and Footers}
+Alternatively, systems are sensitive to tuning.
+This is another easy way to pick up goose eggs during evaluation.
+While the outputs might be spot on and even useful to a human, sensitivity to absolute chord spelling fails to
+This motivates harmonic, Roman numeral analysis as a slightly different formulation of the task; decouple tuning from function.
+While not all chord datasets contain this information, Billboard and Isophonics do.
 
-Do not include headers, footers or page numbers in your submission.
-These will be added when the publications are assembled.
+
+\subsection{The Significance of Chord Representations}
+
+Comparing chords in label space is bonkers.
+Mappings or resolutions effectively quantize chords to a one-hot encoding.
+These can be thought of as mapping chords to bit vectors and then testing for equivalence.
+This is the wrong representation.
+
+One, chords are inherently hierarchical, and this approach to resolution discards these relationships.
+Flat classification problems ---those in which different classes are conceptually independent--- are built on the assumption of mutually exclusive relationships.
+In other words, assignment to one class precludes the valid assignment to any other classes considered.
+For example, ``cat'' and ``dog'' are mutually exclusive classes of ``animal'', but ``cat'' and ``mammal'' are not.
+Returning to chords, \texttt{C:dim7} and \texttt{C:maj} are clearly mutually exclusive classes, but it is difficult to say the same of \texttt{C:maj7} and \texttt{C:maj}, as the former \emph{contains} the latter.
+
+Two, the flexibility of the standard Harte syntax can be abused for ambiguous chords, and it isn't clear what to do with these labels.
+
+Occurrence of bizarre chord spellings in the data:
+Should these even exist?
+
+
+\begin{table}[!t]
+% increase table row spacing, adjust to taste
+% \renewcommand{\arraystretch}{1.4}
+% if using array.sty, it might be a good idea to tweak the value of
+% \extrarowheight as needed to properly center the text within the cells
+\small
+\caption{Various real chord transcriptions for ``With or Without You'' by U2, comparing the reference annotation with six interpretations from a popular guitar tablature website; a raised asterisk indicates the transcription is given relative to a capo, and transposed to the actual key here.}
+\label{tab:wowu_chords}
+\centering
+\begin{tabular}{ c || c c c c | c c c c |}
+Ver. & \multicolumn{4}{c}{Chord Sequence} & Score & Ratings & Views \\
+ \hline
+Ref. & \texttt{D:maj} & \texttt{D:maj/5} & \texttt{D:maj6/6} & \texttt{D:maj(4)/4} & --- & --- & --- \\
+\hline
+1 & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 4/5 & 193 & 1,985,878 \\
+2 & \texttt{D:5} & \texttt{A:sus4} & \texttt{B:min7} & \texttt{G:maj} & 5/5 & 11 & 184,611 \\
+$3^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 4/5 & 23 & 188,152 \\
+$4^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj7} & 4/5 & 14 & 84,825 \\
+$5^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 5/5 & 248 & 338,222 \\
+6 & \texttt{D:5} & \texttt{A:5} & \texttt{D:5/B} & \texttt{G:5} & 5/5 & 5 & 16,208 \\
+\hline
+\end{tabular}
+\end{table}
+
+Chords with bass intervals other than the root should be discarded from chord mapping strategies.
+Otherwise, this will only introduce noise.
+
+
+\subsection{The Natural Conflict between Recognition and Transcription}
+
+The former is literal, the latter is anything but.
+In a recognition problem, silence is always no-chord, because nothing is playing.
+Transcription, on the other hand, is attempting to assign labels to regions, and is closer to segmentation than classic approaches to chord estimation.
+It is easy to find instances of both in the data.
+
+Unfortunately, reference datasets contain annotations of both styles, and sometimes internally to the same annotation.
+Over-specified chords are mostly indicative of a recognition problem, and finds an ambiguous middle ground between harmonic analysis and pitch recognition.
+Alternatively, there are plenty of instances in which annotators make transcriptions decisions.
+Nirvana -- all apologies.
+
+
+\subsection{``There is No Spoon,'' or the  }
+
+Known issue, Ni and company.
+Not enough attention is being drawn to this observation.
+How can we objectively quantify a subjective task?
+
+Examples in the data
+
+
+
 
 \section{First Level Headings}
 
@@ -130,6 +209,7 @@ with 1/2 line of space above the section head, and 1/2 space below it.
 The first letter of each significant word is capitalized.
 
 Using more than three levels of headings is highly discouraged.
+
 
 \section{Footnotes and Figures}
 
@@ -173,7 +253,7 @@ Figures and tables may extend across both columns to a maximum width of 17.2cm.
  \label{fig:example}
 \end{figure}
 
-\section{Summary}
+\section{Conclusions}
 
 In this work, the application of deep learning to large-vocabulary ACE is thoroughly explored, advancing the state of the art using standard evaluation methods.
 Arguably of more importance, both the behavior of the resulting systems and the data used for development are explored in rigorous detail.
