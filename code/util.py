@@ -1,10 +1,15 @@
 import json
 import numpy as np
 import scipy.stats
+import time
 
 from itertools import groupby
 
 import pyjams
+
+
+def timeprint(msg):
+    print("[{0}]: {1}".format(time.asctime(), msg))
 
 
 def hwr(x):

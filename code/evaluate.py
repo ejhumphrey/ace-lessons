@@ -3,6 +3,7 @@ import argparse
 import fnmatch
 import numpy as np
 import json
+import pandas as pd
 from sklearn.externals.joblib import Parallel, delayed
 
 import mir_eval
@@ -12,8 +13,6 @@ import lexicon as lex
 import util
 
 STRICT = lex.Strict(157)
-METRICS = ['triads', 'root', 'v157_strict', 'mirex',
-           'tetrads', 'sevenths', 'thirds', 'majmin']
 
 
 def align_labeled_intervals(ref_intervals, ref_labels, est_intervals,
@@ -148,6 +147,9 @@ COMPARISONS = dict(
     sevenths=mir_eval.chord.sevenths,
     v157_strict=v157_strict)
 
+METRICS = COMPARISONS.keys()
+METRICS.sort()
+
 
 def pairwise_score_labels(ref_labels, est_labels, weights, compare_func):
     """Tabulate the score and weight for a pair of annotation labels.
@@ -250,7 +252,7 @@ def pair_annotations(ref_jams, est_jams, ref_pattern='*', est_pattern='*'):
     return ref_annots, est_annots
 
 
-def score_annotations(ref_annots, est_annots, metrics):
+def score_annotations(ref_annots, est_annots, keys, metrics, verbose=False):
     """Tabulate overall scores for two sets of annotations.
 
     Parameters
@@ -264,10 +266,10 @@ def score_annotations(ref_annots, est_annots, metrics):
 
     Returns
     -------
-    scores : np.ndarray, shape=(n, k)
-        Resulting annotation-wise scores.
-    weights : np.ndarray
-        Relative weight of each score.
+    scores : pd.DataFrame
+        Metric scores, (track_key, metric).
+    support : pd.DataFrame
+        Duration supports, (track_key, metric).
     """
     scores, support = np.zeros([2, len(ref_annots), len(metrics)])
     for n, (ref_annot, est_annot) in enumerate(zip(ref_annots, est_annots)):
@@ -276,11 +278,17 @@ def score_annotations(ref_annots, est_annots, metrics):
         for k, metric in enumerate(metrics):
             scores[n, k], support[n, k] = pairwise_score_labels(
                 ref_labels, est_labels, weights, COMPARISONS[metric])
+        if verbose:
+            print(pd.DataFrame(scores[n:n+1], columns=METRICS,
+                               index=[keys[n]]))
 
+    scores = pd.DataFrame(scores, index=keys, columns=METRICS)
+    support = pd.DataFrame(support, index=keys, columns=METRICS)
     return scores, support
 
 
-def score_annotations_parallel(ref_annots, est_annots, metrics, num_cpus=8):
+def score_annotations_parallel(ref_annots, est_annots, keys, metrics,
+                               num_cpus=8, verbose=False):
     """Tabulate overall scores for two sets of annotations.
 
     Parameters
@@ -317,6 +325,8 @@ def score_annotations_parallel(ref_annots, est_annots, metrics, num_cpus=8):
     for n, k, res in results:
         scores[n, k], support[n, k] = res
 
+    scores = pd.DataFrame(scores, index=keys, columns=METRICS)
+    support = pd.DataFrame(support, index=keys, columns=METRICS)
     return scores, support
 
 
@@ -427,22 +437,27 @@ def tally_scores(ref_annots, est_annots, min_support, metrics=None):
     return results
 
 
-def main(args):
-    ref_jams = util.load_jamset(args.reference_jamset)
-    est_jams = util.load_jamset(args.estimated_jamset)
-    keys = est_jams.keys()
+def score_jamsets(reference_jamset, estimated_jamset, results_file,
+                  ref_annotation_idx=0, est_annotation_idx=0, num_cpus=1,
+                  verbose=False):
 
-    ref_annots = [ref_jams[k].chord[args.ref_annotation_idx] for k in keys]
-    est_annots = [est_jams[k].chord[args.est_annotation_idx] for k in keys]
+    ref_jams = util.load_jamset(reference_jamset)
+    est_jams = util.load_jamset(estimated_jamset)
+    keys = [key for key in est_jams if key in ref_jams]
 
-    if args.num_cpus > 1:
-        scores, supports = score_annotations_parallel(
-            ref_annots, est_annots, METRICS, num_cpus=args.num_cpus)
+    ref_annots = [ref_jams[k].chord[ref_annotation_idx] for k in keys]
+    est_annots = [est_jams[k].chord[est_annotation_idx] for k in keys]
+
+    kwargs = dict(keys=keys, metrics=METRICS, verbose=verbose)
+    if num_cpus > 1:
+        score_fx = score_annotations_parallel
+        kwargs.update(num_cpus=num_cpus)
     else:
-        scores, supports = score_annotations(ref_annots, est_annots, METRICS)
+        score_fx = score_annotations
 
-    with open(args.results, 'w') as fp:
-        data = dict(scores=scores.tolist(), supports=supports.tolist())
+    scores, supports = score_fx(ref_annots, est_annots, **kwargs)
+    with open(results_file, 'w') as fp:
+        data = dict(scores=scores.to_dict(), supports=supports.to_dict())
         json.dump(data, fp)
 
 
@@ -469,5 +484,12 @@ if __name__ == "__main__":
                         metavar="num_cpus", type=int,
                         default=1,
                         help="Path to a JSON file of CQT parameters.")
+    parser.add_argument("--verbose",
+                        dest='verbose', action='store_true', default=False,
+                        help="")
+    args = parser.parse_args()
 
-    main(parser.parse_args())
+    score_jamsets(
+        args.reference_jamset, args.estimated_jamset, args.results_file,
+        args.ref_annotation_idx, args.est_annotation_idx, args.num_cpus,
+        args.verbose)
