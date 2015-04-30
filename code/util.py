@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import pandas as pd
 import scipy.stats
 import time
 
@@ -250,3 +251,9 @@ def save_jamset(jamset, filepath):
 
     with open(filepath, 'w') as fp:
         json.dump(output_data, fp)
+
+
+def load_results(result_file):
+    with open(result_file) as fp:
+        data = json.load(fp)
+    return pd.DataFrame(data['scores']), pd.DataFrame(data['supports'])
