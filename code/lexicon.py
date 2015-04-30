@@ -78,3 +78,38 @@ class Strict(Lexicon):
             label = "%s:%s" % (L.ROOTS[index % 12],
                                L.QUALITIES[self.vocab_dim][int(index) / 12])
         self._label_map[index] = label
+
+
+class Soft(Lexicon):
+
+    def __init__(self, vocab_dim=157):
+        Lexicon.__init__(self, vocab_dim=vocab_dim)
+        self.valid_qualities = L.QUALITIES[vocab_dim]
+
+    def __store_label__(self, label):
+        try:
+            row = L.split(label)
+        except mir_eval.chord.InvalidChordException:
+            row = ['X', '', set(), '']
+        skip = [row[0] == 'X',
+                row[1] not in self.valid_qualities]
+        if any(skip):
+            idx = None
+        elif row[0] == 'N':
+            idx = self.vocab_dim - 1
+        else:
+            idx = mir_eval.chord.pitch_class_to_semitone(row[0])
+            idx += self.valid_qualities.index(row[1]) * 12
+
+        # weak_flag = [len(row[2]) > 0, row[3] not in ['', '1']]
+        self._index_map[label] = idx  # * (-1 if True in weak_flag else 1)
+
+    def __store_index__(self, index):
+        if np.abs(index) >= self.vocab_dim:
+            raise ValueError("index out of bounds: %d" % index)
+        if index == self.vocab_dim - 1:
+            label = "N"
+        else:
+            label = "%s:%s" % (L.ROOTS[index % 12],
+                               L.QUALITIES[self.vocab_dim][int(index) / 12])
+        self._label_map[index] = label

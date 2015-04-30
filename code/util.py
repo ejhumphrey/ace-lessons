@@ -1,4 +1,5 @@
 import json
+import mir_eval
 import numpy as np
 import pandas as pd
 import scipy.stats
@@ -257,3 +258,13 @@ def load_results(result_file):
     with open(result_file) as fp:
         data = json.load(fp)
     return pd.DataFrame(data['scores']), pd.DataFrame(data['supports'])
+
+
+def align_annotations(x, y, sample_size=0.1):
+    y_labels = y.labels.value
+    y_intervals = np.asarray(y.intervals)
+    time_points, y_labels = mir_eval.util.intervals_to_samples(
+        y_intervals, y_labels, sample_size=sample_size)
+    x_labels = mir_eval.util.interpolate_intervals(
+        np.array(x.intervals), x.labels.value, time_points, 'N')
+    return x_labels, y_labels

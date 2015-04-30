@@ -1,20 +1,26 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import hsv_to_rgb
-import mir_eval
+import mpld3
 import numpy as np
-# import mpld3
 import seaborn
-seaborn.set()
-# mpld3.enable_notebook()
 
+import util
 import lexicon as lex
 
-vocab = lex.Strict(157)
+seaborn.set()
+
+VOCAB = dict(strict=lex.Strict(157), soft=lex.Soft(157))
 
 
-def trackwise_scatter(x, y, ax=None, figsize=(8, 8)):
-    if not ax:
+def trackwise_scatter(x, y, fig=None, ax=None, figsize=(8, 8),
+                      voffset=50, location='bottom right'):
+    if not fig and ax:
+        raise ValueError("Cannot specify `ax` without `fig`.")
+
+    if not fig:
         fig = plt.figure(figsize=figsize)
+
+    if not ax:
         ax = fig.gca()
 
     assert (x.index == y.index).all()
@@ -26,10 +32,11 @@ def trackwise_scatter(x, y, ax=None, figsize=(8, 8)):
     ax.set_xlim(-0.05, 1.05)
     ax.set_ylim(-0.05, 1.05)
     ax.yaxis.labelpad = 10
-    # tooltip = mpld3.plugins.PointLabelTooltip(
-    #     scat_handle, [str(_) for _ in x.index])
-    # mpld3.plugins.connect(fig, tooltip)
-    return ax
+    tooltip = mpld3.plugins.PointLabelTooltip(
+        scat_handle, [str(_) for _ in x.index],
+        voffset=voffset, location=location)
+    mpld3.plugins.connect(fig, tooltip)
+    return fig, ax
 
 
 def chord_idx_to_colors(idx, max_idx=156, no_chord_idx=156, x_chord_idx=-1):
@@ -60,29 +67,48 @@ def chord_idx_to_colors(idx, max_idx=156, no_chord_idx=156, x_chord_idx=-1):
     return hsv_to_rgb(hsv.reshape(1, -1, 3))
 
 
-def labels_to_colors(labels):
+def labels_to_colors(labels, vocab='strict'):
     """Transform a collection of labels to a color matrix.
 
     Parameters
     ----------
     labels : array_like
-        Collection of chord labels to map to a color space
+        Collection of chord labels to map to a color space.
+
+    Returns
+    -------
+    colors : np.ndarray, shape=(1, len(idx), 3)
+        Matrix of color values.
     """
-    label_idx = np.array(vocab.label_to_index(labels))
+    label_idx = np.array(VOCAB[vocab].label_to_index(labels))
     label_idx[np.equal(label_idx, None)] = -1
     return chord_idx_to_colors(label_idx.astype(int))
 
 
-def plot_color_legend(ax, labels, max_labels=20, min_ratio=0.005):
-    labels = np.array(labels).flatten()
+def draw_color_legend(ax, labels, max_labels=20, min_ratio=0.005,
+                      vocab='strict'):
+    """Transform a collection of labels to a color matrix.
+
+    Parameters
+    ----------
+    ax : axes
+        Axes on which to draw the color legend.
+    labels :
+
+    Returns
+    -------
+    colors : np.ndarray, shape=(1, len(idx), 3)
+        Matrix of color values.
+    """
+    labels = np.concatenate([np.array(_) for _ in labels]).flatten()
     unique_labels = np.unique(labels)
     counts = np.array([np.array([_ == y for _ in labels]).sum()
                        for y in unique_labels])
     sidx = np.argsort(counts)[::-1]
     labels = unique_labels[sidx[:max_labels]]
-    colors = labels_to_colormap(labels).squeeze()
+    colors = labels_to_colors(labels, vocab=vocab).squeeze()
     for n, (l, c) in enumerate(zip(labels, colors)):
-        print counts[sidx[n]], (counts[sidx[n]] / float(np.sum(counts)))
+        # print counts[sidx[n]], (counts[sidx[n]] / float(np.sum(counts)))
         if (counts[sidx[n]] / float(np.sum(counts))) < min_ratio:
             n -= 1
             break
@@ -94,38 +120,52 @@ def plot_color_legend(ax, labels, max_labels=20, min_ratio=0.005):
     ax.set_ylim((-0.75, 1))
 
 
-def draw_annotations(key):
-    # Select the JAMS for this key
-    ref_jam = refs[key]
-    est_jam = ests[0][key]
+def plot_annotations(annotations, names, plt_size=(11, 3),
+                     leg_size=(11, 1.25), vocab='strict'):
+    """
+    Parameters
+    ----------
+    annotations : list of Annotations, len=n
+        JAMS RangeAnnotations; will align all to the first.
+    names : list of str
+        Labels to assign to each annotation, len=n
+
+    Returns
+    -------
+    fig, ax : plt.figure, plt.axes
+    """
 
     # Align all annotations
-    dt_labels, est_labels = align_ref_to_est(ref_jam.chord[0], est_jam.chord[0])
-    tdc_labels = align_ref_to_est(ref_jam.chord[1], est_jam.chord[0])[0]
+    if len(annotations) > 1:
+        labels = list(util.align_annotations(*annotations[:2]))
+        labels += [util.align_annotations(annotations[0], a)[1]
+                   for a in annotations[2:]]
+    else:
+        labels = util.align_annotations(annotations[0], annotations[0])[0]
 
+    # return labels
     # Draw the annotations
-    fig = plt.figure(figsize=(11, 3))
-    labels = [dt_labels, tdc_labels, est_labels]
-    subject = ['DT', 'TdC', 'XL-0.25']
-#     plt.title(ref_jam.)
+    figs = [plt.figure(figsize=plt_size)]
     plt.xticks([])
     plt.yticks([])
-    for idx, (l, n) in enumerate(zip(labels, subject)):
-        ax = fig.add_subplot(311 + idx)
-        ax.imshow(labels_to_colormap(l), interpolation='nearest', aspect='auto')
+    base_idx = 11 + 100*len(labels)
+    for idx, (l, n) in enumerate(zip(labels, names)):
+        ax = figs[0].add_subplot(base_idx + idx)
+        ax.imshow(labels_to_colors(l, vocab=vocab),
+                  interpolation='nearest', aspect='auto')
         ax.set_ylabel(n)
         ax.set_xticks([])
         ax.set_yticks([])
 
     ax.set_xlabel("Time")
     plt.tight_layout()
-    plt.savefig("{0}/rc_{1}_annotations.pdf".format(outdir, key),
-                transparent=True)
 
     # Draw the legend
-    fig = plt.figure(figsize=(11, 1.25))
-    ax = fig.gca()
-    plot_color_legend(ax, labels, 20)
+    figs += [plt.figure(figsize=leg_size)]
+    ax = figs[-1].gca()
+    draw_color_legend(ax, labels, 20, vocab=vocab)
     plt.tight_layout()
-    plt.savefig("{0}/rc_{1}_legend.pdf".format(outdir, key),
-                transparent=True)
+    return figs
+
+    # plt.savefig("{0}/rc_{1}_annotations.pdf".format(outdir, key),
+    #             transparent=True)
