@@ -121,7 +121,8 @@ def draw_color_legend(ax, labels, max_labels=20, min_ratio=0.005,
 
 
 def plot_annotations(annotations, names, plt_size=(11, 3),
-                     leg_size=(11, 1.25), vocab='strict'):
+                     leg_size=(11, 1.25), vocab='strict',
+                     max_length=None, label_start=0):
     """
     Parameters
     ----------
@@ -143,7 +144,9 @@ def plot_annotations(annotations, names, plt_size=(11, 3),
     else:
         labels = util.align_annotations(annotations[0], annotations[0])[0]
 
-    # return labels
+    if max_length:
+        labels = [x[label_start:label_start + max_length] for x in labels]
+
     # Draw the annotations
     figs = [plt.figure(figsize=plt_size)]
     plt.xticks([])
@@ -166,6 +169,3 @@ def plot_annotations(annotations, names, plt_size=(11, 3),
     draw_color_legend(ax, labels, 20, vocab=vocab)
     plt.tight_layout()
     return figs
-
-    # plt.savefig("{0}/rc_{1}_annotations.pdf".format(outdir, key),
-    #             transparent=True)
