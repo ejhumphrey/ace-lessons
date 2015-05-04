@@ -77,11 +77,12 @@ Various classification strategies have been investigated such as binary template
 Post-filtering methods, shown to significantly impact system performance \cite{Cho2010Exploring}, have become increasing more complex, ranging from Viterbi decoding \cite{Sheh2003Chord} to, more recently, Dynamic Bayesian Networks (DBNs) \cite{Mauch2010Approximate}, Conditional Random Fields \cite{Sumi2012Music}, or Recursive Neural Networks \cite{Boulanger2013Automatic}.
 
 
-And yet, despite all this work, performance is only okay.
+And yet, despite all this work, performance appears to be tapering off.
+In addition to apparently beginning to over-fit the data used at MIREX, the application of larger datasets and chord vocabularies has further diminished state of the art performance.
 Where do we go from here?
 What are the limitations of this approach?
 What can we learn from thorough error analysis?
-This work hypothesizes that it is worth pausing to consider that perhaps there is something else afoot.
+This work proposes that it is worth pausing to consider that perhaps there is something else afoot.
 % Not just about building a better mousetrap
 This paper is organized as follows:
 Section \ref{}
@@ -149,7 +150,8 @@ These incompatible notes are explained away in the overall harmonic scene, as th
 
 \subsection{Data Collections}\label{subsec:data}
 
-Actually, how you define a chord doesn't really matter; this is implicitly a function of the data you use.
+% Actually, how you define a chord doesn't really matter; this is implicitly a function of the data you use.
+In the absence of an explicit definition of a chord, one is adopted implicitly in the process of curating a set of chord annotations.
 Definition of a chord and the chord annotations collected are indistinguishable.
 
 \subsubsection{Ground Truth Datasets}
@@ -299,10 +301,8 @@ That said, these results also seem to indicate that there is certainly room for 
 While overall recall gives a good general measure of system performance, we are particularly interested in developing a more nuanced understanding of how these systems behave.
 % but it is likely that they don't tell the whole story,
 % Therefore, it is necessary explore performance at a more granular level to untangle what factors contribute to these numbers.
-To these ends, it is useful to explore track-wise recall due to the strong relationship between chords and harmony internal to a song, reinforced further by the repetitive structure of music.
-As a result, errors will likely localize within tracks, and it will be easier to identify broader trends and problematic behaviors.
-Therefore, two track-wise performance graphs are produced to facilitate the exploration and further analysis of these systems.
-% Trackwise analysis can be particularly informative, as errors and other kinds of interesting behavior should be well-localized within a track, making it easier to draw broader conclusions from the data.
+Track-wise analysis is informative in this instance, due to the strong relationship between chords and harmony internal to a song.
+Errors and other kinds of noteworthy behavior should be well-localized within a track as a result, making it easier to draw broader conclusions from the data.
 
 \begin{figure}[!t]
 \centering
@@ -318,6 +318,14 @@ Therefore, two track-wise performance graphs are produced to facilitate the expl
 \label{fig:annotator_agreement}
 \end{figure}
 
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_annotations_mkup2}
+\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_legend}
+\caption{Six perspectives on ``I Saw Her Standing There'', by \emph{The Beatles}, according to Isophonics (Iso), Billboard (BB), David Temperley (DT), Trevor deClercq (TdC), the Deep Neural Network (DNN), and the k-stream HMM (kHMM).}
+\label{fig:beatles}
+\end{figure*}
+
 
 % Ground truth trackwise
 First, leveraging the ground truth data, Figure \ref{fig:model_agreement} compares the agreement between machine estimations, along $x$, with the better estimated annotation for the given reference, along $y$.
@@ -331,6 +339,7 @@ Quadrant II, $(x < 0.5, y > 0.5)$, in which one estimation matches the reference
 Quadrant III, $(x < 0.5, y < 0.5)$, in which all annotations disagree;
 and finally, Quadrant IV, $(x > 0.5, y < 0.5)$, in which the estimations agree more with each other than the reference.
 
+
 % Rock corpus
 A similar comparison is made over the Rock Corpus dataset, given in Figure \ref{fig:annotator_agreement}, where \emph{annotator} agreement, along $x$, is shown against the agreement of the best matching reference for a given estimation, along $y$.
 As an analog to the previous plot, only a single estimation (kHMM) is considered, offering a comparable three-part hypothesis:
@@ -338,7 +347,6 @@ one, tracks with an estimated annotation that fails to match either human perspe
 two, annotator disagreement in the presence of a matching estimation highlights a subjective annotation;
 and three, disagreement between all annotations is suspicious and should be explored.
 A quadrant partition consistent with the previous plot yields a similar interpretation, exchanging dual estimations for dual references.
-
 
 
 \section{Understanding Performance, in Four Parts}
@@ -349,45 +357,36 @@ Using the trackwise plots to identify interesting datapoints worthy of qualitati
 Dig through the estimations, look at errors.
 Arrive at a variety of observations that are outlined here.
 
-An example from Quandrant
+A particularly dense example is given in Figure \ref{fig:beatles}, which happens to intersect the Isophonics, Billboard, and Rock Corpus datasets, resulting in four human and two machine estimations.
 
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_annotations_mkup2}
-\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_legend}
-\caption{Six perspectives on ``I Saw Her Standing There'', by \emph{The Beatles}, according to Isophonics (Iso), Billboard (BB), David Temperley (DT), Trevor deClercq (TdC), the Deep Neural Network (DNN), and the k-stream HMM (kHMM).}
-\label{fig:beatles}
-\end{figure*}
+
 
 % Content Validity
 \subsection{Harmonic Validity}
 \label{subsec:validity}
 
-Within the realm of all Western music, the use of harmony and chords has steadily evolved over time.
-Classically, music theorists have long sought to characterize musical works via analysis and reduction as a means to understanding, typically operating from a symbolic representations, i.e. a score.
-As a result, the language of ``chords'' developed as an expressive, yet compact, language with which one might describe a piece of music harmonically.
-However, Western ``pop music'', infused with elements of folk, blues, jazz, rock and countless other influences, is not to required to adhere to or consider the rules of traditional tonal theory \cite{Tagg1982Analysing}.
-Thus efforts to understand the former in the language of the latter is ultimately limited by the validity in doing so.
+For both Figures \ref{fig:model_agreement} and \ref{fig:model_agreement}, Quadrant III ---the condition where all annotations disagree--- serves to identify tracks that contribute a large source of error to overall performance, but on which no one can agree.
+Investigating these tracks further results in two general discoveries, both related to the notion of harmonic validity.
 
-While contemporary popular music is certainly influenced by this tradition, it by no means adheres to the same rules and conventions.
-Even in the constrained space of Western tonal music set forth here, not all musical works will be well-described by the language of harmonic analysis, and thus chords may be a clumsy language with which to describe such music.
-An alternative approach to analysis, such as voice leading, might make more sense in this instance;
-in others, such as ``math rock'', a lack of clearly structured harmonic content may arguably render the goal of harmonic analysis irrelevant \cite{Cateforis2002Alternative}.
-As genre is itself an amorphous and ill-defined concept, the degree to which a piece of music might be understood harmonically will vary, both absolutely and internally.
+% Alternatively, systems are sensitive to tuning.
+% This is another easy way to pick up goose eggs during evaluation.
+% While the outputs might be spot on and even useful to a human, sensitivity to absolute chord spelling fails to
+% This motivates harmonic, Roman numeral analysis as a slightly different formulation of the task; decouple tuning from function.
+% While not all chord datasets contain this information, Billboard and Isophonics do.
 
-Not all music is well described by chords.
-Because you \emph{can} annotate chords in a song, doesn't mean you should.
-Revolution 9, Love You To, Within You, Without You Beastie Boys (Brass Monkey), Fugees (Killing Me Softly), de la Soul, Sublime (Don't Push).
-These are not well described by chords, and introduce noise in the evaluation process.
+The first issue stems from issues of tuning and intonation.
+A number of tracks are not tuned to A440, in some instances varying by more than a quarter-tone:
+for example, ``Stand By Me'' by Jimmy Ruffin, ``I'll Tumble 4 Ya'' by \emph{The Culture Club}, ``Every Breath You Take'' by \emph{The Police}, or ``Nowhere to Run'' by Martha Reeves and the Vandellas.
+As a result, the estimated annotations differ from the reference by a half-step, and yet yield recall scores near zero, often only getting the ``no-chords'' in the track correct.
+While the importance of tuning has been discussed previously in ACE research, this raises two interesting questions.
+Is it a meaningful obstacle to force automatic systems to compensate for imprecise tuning, or a necessary assumption given the task of estimating absolute chord names?
+And furthermore, should evaluation measures be able to characterize ``good'' annotations that happen to be agnostic to key?
 
-Alternatively, systems are sensitive to tuning.
-This is another easy way to pick up goose eggs during evaluation.
-While the outputs might be spot on and even useful to a human, sensitivity to absolute chord spelling fails to
-This motivates harmonic, Roman numeral analysis as a slightly different formulation of the task; decouple tuning from function.
-While not all chord datasets contain this information, Billboard and Isophonics do.
-
-
-
+% Not all music is well described by chords.
+The second, and far more interesting, observation, has to do with the fact that some tracks considered arguably do not have valid chord transcriptions.
+While a few songs by \emph{The Beatles} have been known by those in the ACE community to be of questionable relevance, such as ``Revolution 9,'' ``Love You To,'' or ``Within You, Without You'', error analysis here reveals a greater number of tracks across a variety of genres:
+for example, ``Brass Monkey'' by \emph{The Beastie Boys}, ``I, Me, \& Myself'' by \emph{de la Soul}, ``Don't Push'' by \emph{Sublime}, ``Get Up (I Feel Like Being a Sex Machine'' by James Brown, or ``I Wanna Take You Higher'' by Tina and Ike Turner.
+This realization motivates the notion that the harmonic language of chords may not be applicable for all kinds of music, and that using such songs for evaluation may lead to erroneous or misleading results.
 
 
 \subsection{Labels, Lexicons, \& the Limits of Flat Classification}
