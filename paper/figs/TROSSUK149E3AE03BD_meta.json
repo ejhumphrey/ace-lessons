@@ -1,0 +1,47 @@
+{
+  "release": "I Saw Her Standing There", 
+  "identifiers": {
+    "audio_md5": "f71cc76d97d21c8709f59d60849c4d43", 
+    "echonest_song_id": "SOFJGFM12B20E5E497", 
+    "echonest_track_id": "TROSSUK149E3AE03BD", 
+    "md5": "f71cc76d97d21c8709f59d60849c4d43"
+  }, 
+  "stats": {
+    "triads": {
+      "kHMM": 0.90412694740500965, 
+      "DNN": 0.88731617164611665
+    }, 
+    "thirds": {
+      "kHMM": 0.90412694740500965, 
+      "DNN": 0.89909799705333326
+    }, 
+    "v157_strict": {
+      "kHMM": 0.5438080388088018, 
+      "DNN": 0.29663942812100508
+    }, 
+    "tetrads": {
+      "kHMM": 0.51658194148188175, 
+      "DNN": 0.28446631290392915
+    }, 
+    "sevenths": {
+      "kHMM": 0.51658194148188175, 
+      "DNN": 0.28446631290392915
+    }, 
+    "majmin": {
+      "kHMM": 0.90412694740500965, 
+      "DNN": 0.88731617164611665
+    }, 
+    "root": {
+      "kHMM": 0.90468074569508561, 
+      "DNN": 0.90767253060711062
+    }, 
+    "mirex": {
+      "kHMM": 0.90412694740500965, 
+      "DNN": 0.9394109745415351
+    }
+  }, 
+  "jams_version": "0.0.1", 
+  "artist": "The Beatles", 
+  "duration": 175.8302, 
+  "title": "I Saw Her Standing There"
+}

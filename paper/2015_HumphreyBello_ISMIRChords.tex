@@ -5,8 +5,12 @@
 
 \documentclass{article}
 \usepackage{ismir,amsmath,cite}
+\usepackage{url}
 \usepackage{graphicx}
 \usepackage{color}
+%\usepackage{hyperref}
+
+\graphicspath{{figs/}}
 
 % Title.
 % ------
@@ -45,49 +49,62 @@ Synthesizing these observations, this paper offers possible remedies going forwa
 \end{abstract}
 
 
-
-
-\section{Introduction}\label{sec:introduction}
+\section{Introduction}
+\label{sec:introduction}
 
 % Chord rec is standard in the community
-Among the various subtopics in content-based music informatics, automatic chord estimation (ACE) has matured into a prototypical MIR challenge, receiving healthy attention from the research community for the better part of two decades.
- % benchmark challenge at the annual MIReX event\footnote{{http://www.music-ir.org/mirex/wiki/MIREX\_HOME}}.
+Among the various subtopics in content-based music informatics, automatic chord estimation (ACE) has matured into a classic MIR challenge, receiving healthy attention from the research community for the better part of two decades.
 %, people want / need
-Complementing our healthy sense of academic intrigue, the broader music learning public places a high demand on chord-based representations of popular music, as evidenced by large online communities surrounding websites like e-chords\footnote{http://www.e-chords.com} or Ultimate Guitar\footnote{http://www.ultimate-guitar.com}.
-% Countless individuals invest considerable time and effort in the curation and consumption of popular music transcriptions,
+Complementing our natural sense of academic intrigue, the broader music learning public places a high demand on chord-based representations of popular music, as evidenced by large online communities surrounding websites like e-chords\footnote{\url{http://www.e-chords.com}} or Ultimate Guitar\footnote{\url{http://www.ultimate-guitar.com}}.
 % ...but this is difficult
-However, given the prerequisite skill necessary to manually identify chords from recorded audio, there is considerable motivation to develop automated systems capable of reliably performing this task.
+Given the prerequisite skill necessary to manually identify chords from recorded audio, there is considerable motivation to develop automated systems capable of reliably performing this task.
 
-Following these motivations, the goal of an ACE system is --or, at least, has been-- to produce ``good'' time-aligned sequence of chords from a given music signal.
-% We've stepped up to the challenge, and have been revising our designs.
-Notably, most approaches to the task adopt the same basic architecture, diagrammed in Figure \ref{fig:basic_ace} \cite{Cho2014Improved}:
+
+Following these motivations, the goal of ACE research is ---or, at least, has been--- to develop systems that produce ``good'' time-aligned sequence of chords from a given music signal.
+Supplemented by efforts in data curation \cite{Burgoyne2011Billboard}, syntax standardization \cite{Harte2005XXX}, and evaluation \cite{Pauwels2013Evaluating}, the bulk of chord estimation research has concentrated on building better systems, mostly converging to a common architecture \cite{Cho2014Improved}:
+%, diagrammed in Figure \ref{fig:basic_ace}
 first, harmonic features, referred to as pitch class profiles (PCP) or \emph{chroma}, are extracted from short-time observations of the audio signal \cite{Fujishima1999Realtime};
 these features may then be processed by any number of means, referred to in the literature as \emph{pre-filtering};
 next, \emph{pattern matching} is performed independently over observations to measure the similarity between the signal and a set of pre-defined chord classes, yielding a time-varying posterior likelihood;
 and finally, \emph{post-filtering} is applied to this chord class posterior, resulting in a sequence of chord labels over time.
 
 
-% We've been hacking at this for a while though, and we're noting some diminsing returns
-% Some refine features
-% Some have thrown bigger beastlier models at it
+Much time and energy has been invested in improving chroma features \cite{Mueller2010Towards}, while others have explored the use of multi-band chroma \cite{Mauch2010Simultaneous} or Tonnetz representations \cite{Lee2007Unified}.
 % Some have tried feature learning
-% Some have mixed all the things
-Recently, in an effort to continue to advance the state of the art, researchers have begun exploring more complex post-filtering methods such as Dynamic Bayesian Networks (DBNs) \cite{Mauch2010Approximate}, Conditional Random Fields \cite{Sumi2012Music}, Variable-Length Markov Models \cite{Chordia2011Predictive}, or Recursive Neural Networks \cite{Boulanger2013Automatic}.
+Acknowledging the challenges inherent to designing good features, Pachet et al pioneered work in automatic feature optimization \cite{Pachet2006Recognizing}, and more recently deep learning methods have been employed to learn robust Tonnetz features \cite{Humphrey2012Learning}.
+Earlier methods focused on local smoothing, such as low-pass or median filtering as a form of pre-filtering \cite{Cho2010Exploring}, but more recently repetitive structure has been exploited for pre-filtering \cite{Cho2011Feature}.
+Various classification strategies have been investigated such as binary templates \cite{Oudre2009Template}, Dirichlet distribution models \cite{Burgoyne2005Learning}, or Support Vector Machines (SVMs) \cite{Weller2009Structured}, but Gaussian Mixture Models (GMM) are by and large the most common feature modeling approach \cite{Cho2014Improved}.
+Post-filtering methods, shown to significantly impact system performance \cite{Cho2010Exploring}, have become increasing more complex, ranging from Viterbi decoding \cite{Sheh2003Chord} to, more recently, Dynamic Bayesian Networks (DBNs) \cite{Mauch2010Approximate}, Conditional Random Fields \cite{Sumi2012Music}, or Recursive Neural Networks \cite{Boulanger2013Automatic}.
 
 
+And yet, despite all this work, performance is only okay.
+Where do we go from here?
+What are the limitations of this approach?
+What can we learn from thorough error analysis?
+This work hypothesizes that it is worth pausing to consider that perhaps there is something else afoot.
 % Not just about building a better mousetrap
-% Been curating data
-% Developing syntax
-% Discussing evaluation
-%
+This paper is organized as follows:
+Section \ref{}
+Section \ref{}
 
 
-\section{But what is a ``chord''?}
+\section{ACE Research Methodology}
+
+A generic research methodology for content-based music informatics looks something like the following:
+
+\begin{enumerate}
+\item Define the problem.
+\item Collect data accordingly.
+\item Build a solution.
+\item Evaluate the model.
+\item Iterate.
+\end{enumerate}
+
+
+\subsection{What is a ``chord''?}
 
 % Attempts to define a chord
-a \emph{chord} is classically conceived as a simultaneous grouping of notes.
-While much of this theory can be detailed specifically, real music is by no means so well behaved.
-As a result, a more practical definition of a ``chord'' is open to some interpretation, and may take multiple meanings.
+While a \emph{chord} is conceived as a simultaneous grouping of notes, a more practical definition of a ``chord'' is open to some interpretation.
 For example, \cite{McVicar2013Machine} collects three possible definitions, restated here:
 
 \begin{enumerate}
@@ -98,75 +115,74 @@ For example, \cite{McVicar2013Machine} collects three possible definitions, rest
 
 % Pitch and notes
 Additionally, \cite{Harte2010Towards} expands the scope of (2) in order to describe \emph{all} tonal music, ``allow[ing] a chord to comprise zero or more notes.''
-The various flavors of definitions begs an obvious question: what makes the concept of a chord so hard to pin down?
+The various flavors of definitions begs an obvious question:
+what makes the concept of a chord so hard to pin down?
 
-% Chord composition
-Much of this difficulty stems from the fact that the relative importance of the individual notes in a collection may change in different contexts.
-In practice, a chord is named based on three, potentially subjective, criteria:
-its root, its contributing intervals, and how these two relate to the perceived key.
-Therefore, as will be shown shortly, a chord may take a different name if any of these decisions are changed or re-weighted.
+% % Chord composition
+% Much of this difficulty stems from the fact that the relative importance of the individual notes in a collection may change in different contexts.
+% In practice, a chord is named based on three, potentially subjective, criteria:
+% its root, its contributing intervals, and how these two relate to the perceived key.
+% The one invariant property shared by all definitions named previously is the idea that a pitch collection may be understood as a single harmonic object.
+% The time span over which this phenomena may unfold, however, is flexible.
+%Therefore, as will be shown shortly, a chord may take a different name if any of these decisions are changed or re-weighted.
 
 % Why is it so hard to define a chord? Let's look at some examples
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\columnwidth]{expanded_major}
+\includegraphics[width=0.6\columnwidth]{nonchord_tones}
+\caption{A stable F major chord played out over three time scales, as a true simultaneity, an arpeggiation, and four non-overlapping quarter notes; (bottom) a sustained C major chord is embellished by passing non-chord tones.}
+\label{fig:harmonic_objects}
+\end{figure}
 
 % Expanded over time leads to the same chord
-A coarse understanding of the variation inherent to defining a chord can be obtained by exploring a few simple examples.
-The one invariant property shared by all definitions named previously is the idea that a pitch collection may be understood as a single harmonic object.
-The time span over which this phenomena may unfold, however, is flexible.
-To illustrate the point, consider the three bars notated in Figure \ref{fig:expanded_major}, where a major chord is written as a true simultaneity, an arpeggiation, and as an series of non-overlapping quarter notes, respectively.
-In this instance, the degree of overlap in time is expanded until it no longer exists, and yet the collection of notes continues to function as a coherent harmonic object.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\textwidth]{expanded_major}
-\caption{A stable F major chord played out over three time scales, as a true simultaneity, an arpeggiation, and four non-overlapping quarter notes.}
-\label{fig:expanded_major}
-\end{figure}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.6\textwidth]{nonchord_tones}
-\caption{A stable C major chord is embellished by passing non-chord tones.}
-\label{fig:nonchord_tones}
-\end{figure}
-
+The inherent difficulty in defining a chord can be illustrated by two simple examples.
+Consider the two short phrases notated in Figure \ref{fig:harmonic_objects}.
+First, an \texttt{F:maj} chord is written as a true simultaneity, an arpeggiation, and as a series of non-overlapping quarter notes, respectively.
+Here, the degree of overlap in time is expanded until it no longer exists, and yet the collection of notes will continue to function as a coherent harmonic object.
 % True simultaneity doesn't always make a chord
-On the other hand, as shown in Figure \ref{fig:nonchord_tones}, the simultaneous sounding of different notes does not necessarily give rise to the perception of different chords.
-Here, a major triad is sustained under the first several degrees of its scale.
-While three notes in the upper voice are contained in the C-major triad, the others --the D, F, and A-- are referred to as ``nonchord'' tones.
-These extra notes are explained away in the overall harmonic scene, as they fall on metrically weak beats, are comparatively short in duration, and quickly move to notes that \emph{are} in the chord.
-These embellishments do not contribute to the harmonic center of the phrase, and the bar can still be understood as a stable C major chord.
+On the other hand, the simultaneous sounding of different notes does not necessarily give rise to the perception of different chords, where a major triad is sustained under the first several degrees of its scale.
+While three notes in the upper voice are contained in the \texttt{C:maj}, the others --the D, F, and A-- are referred to as ``nonchord'' tones.
+These incompatible notes are explained away in the overall harmonic scene, as they fall on metrically weak beats, are comparatively short in duration, and quickly move to notes that \emph{are} in the chord.
+%These embellishments do not contribute to the harmonic center of the phrase, and the bar can still be understood as a stable C major chord.
 
 
 
+\subsection{Data Collections}\label{subsec:data}
 
-\section{Methodology}
+Actually, how you define a chord doesn't really matter; this is implicitly a function of the data you use.
+Definition of a chord and the chord annotations collected are indistinguishable.
+
+\subsubsection{Ground Truth Datasets}
+
+There are several chord annotation datasets available for research purposes.
+The first major effort to curate reference chord transcriptions, led by Harte in the mid-2000s, is referred to as the ``Isophonics'' dataset\footnote{\url{http://isophonics.net/content/reference-annotations}}.
+Initially covering the entire 180-song discography of The Beatles, it has been since been expanded with other content;
+ 20 tracks by the band Queen, provided by Matthias Mauch.
+Two newer datasets were publicly released in 2011, offering a more diverse musical palette, one of over 700 tracks led by J. Ashley Burgoyne \cite{Burgoyne2011Expert} and another of 295 tracks led by Tae Min Cho, from the Music and Audio Research Lab (MARL) at NYU\footnote{{https://github.com/tmc323/Chord-Annotations}}.
+The former, referred to as ``Billboard'', employed a rigorous sampling and annotation process, selecting songs from Billboard magazine's ``Hot 100'' charts spanning more than three decades.
+The latter, referred to here as ``MARL'', consists of chord annotations performed by undergraduate music students for 195 tracks drawn from the USPop dataset\footnote{\url{http://labrosa.ee.columbia.edu/projects/musicsim/uspop2002.html}} and 100 tracks from the RWC-Pop collection\footnote{\url{https://staff.aist.go.jp/m.goto/RWC-MDB/rwc-mdb-p.html}}, in the hopes that sampling from common MIR datasets might facilitate access within the community.
+In all three cases, chord annotations are provided as ``ground truth'', on the premise that the annotations represent a gold standard perspective.
+% To this end, annotation efforts employed a review process, where the transcriptions of one or more annotators were verified by different individuals.
 
 
-\subsection{Data}\label{subsec:data}
+\subsubsection{The Rock Corpus}
 
-In order to objectively measure the quality of a proposed ACE system, it is necessary to address two related components: the collection of ground-truth data, and the manner in which estimations are compared to this reference data.
-
-The first major effort to curate ground truth chord transcriptions was led by Harte in the mid-2000s, referred to as the Isophonics dataset\footnote{\url{http://isophonics.net/content/reference-annotations}}, where a small team of researchers transcribed the entire discography of The Beatles.
-Containing chord annotations for 180 tracks, this was a landmark dataset in the field of MIR and shaped years of ACE research.
-Importantly, this transcription effort leveraged professional transcriptions of the music under consideration, and was verified for accuracy multiple times.
-However, despite this rigor, the data is drawn from a single artist and very well known to the research community; some have argued that ACE research has begun to manually overfit this collection.
-
-To combat these issues, two datasets were released following the 2011 Conference of the International Society of Music Information Retrieval (ISMIR), one of over 700 tracks led by J. Ashley Burgoyne \cite{Burgoyne2011Expert} and another of 295 tracks led by Tae Min Cho, from the Music and Audio Research Lab at NYU\footnote{\url{https://github.com/tmc323/Chord-Annotations}}; here, the former is referred to as ``Billboard'' and the latter as ``MARL-Chords'', corresponding to their related projects.
-In parallel, an additional, comparatively small, dataset was released, containing 20 tracks by the band Queen, provided by Matthias Mauch as an extension to the Isophonics set.
-In all four cases, the chord transcriptions are provided as ``ground truth'', on the premise that the data corresponds to the expert perspective.
-To help prevent errors and resolve judgment calls, these additional annotation efforts employed a review process, where the transcriptions of one or more annotators were verified by a different individual.
-
-Thirteen chord qualities, given in Table \ref{tab:qualities}, in all twelve pitch classes and one no-chord class are considered for a total of 157 chord classes.
-Having all four datasets at hand, these collections are merged into the largest collection of chord transcriptions used to date, totaling 1235 tracks.
-Given that the collections were curated in isolation of each other, it is a necessary first step to identify and remove duplicates to avoid data contamination during cross validation.
-To these ends, each recording is checked against the EchoNest Analyze API\footnote{http://developer.echonest.com/docs/v4} and associated with its track and song identifiers, corresponding to the recording and work, respectively.
-Though multiple track IDs will map to the same song ID, uniqueness is defined at the level of a song to ensure duplicates are removed.
-This identifies 18 redundant songs, and all but one is dropped for each collision from the total collection, resulting in a final count of 1217 unique tracks.
+The majority of human-provided chord annotations are often singular, either being performed by one person or as the result of a review process to resolve disagreements.
+Alternatively, the \emph{Rock Corpus} dataset, first introduced in \cite{deClercq2011Corpus}, is a set of 200 popular rock tracks with time-aligned chord and melody transcriptions performed by two expert musicians:
+one, a pianist, and the other, a guitarist.
+% This insight into musical expertise adds an interesting dimension to the inquiry when attempting to understand alternate interpretations by the annotators.
+This collection of chord transcriptions has seen little use in the ACE literature, as its initial release lacked timing data for the transcriptions.
+A subsequent release fixed this issue, however, in addition to doubling the size of the collection.
+This dataset provides an opportunity to explore the behavior of ACE systems as a function of multiple reference transcriptions at a larger scale than previously considered.
 
 
 \subsection{Automatic Systems}
+\label{subsec:systems}
 
-For algorithmic parity, two systems are considered here having adopted the same output chord prediction space and trained over the same data splits.
+There are a variety of chord algorithms out there.
+We focus our investigation on two high-performing systems for which we are able to control for training and vocabulary.
+These systems are reasonably different, and will hopefully provide different machine perspectives of the chord estimation problem.
 
 
 \subsubsection{K-stream GMM-HMM with Multiband Chroma}
@@ -176,7 +192,6 @@ A multiband chroma representation is computed from beat-synchronous audio analys
 Each is fit to a separate Gaussian Mixture Model (GMM) by rotating all chroma vectors and chord labels to C.
 During inference, four separate observation likelihoods over all chord classes are obtained by circularly rotating the feature vector the GMM.
 These four posteriors are then decoded jointly, using a k-stream HMM, resulting in a beat-aligned chord sequence.
-In addition to being one of the highest performing systems at a recent iteration of MIReX, a software implementation was obtained, thereby enabling experimental consistency between partitions of the training data.
 
 
 \subsubsection{Deep Convolutional Neural Network}
@@ -184,8 +199,8 @@ In addition to being one of the highest performing systems at a recent iteration
 Acknowledging both the limited representational power of GMMs and a similar trend that occurred in automatic speech recognition, a deep convolutional network is also considered \cite{Humphrey2015Fully}.
 Time-frequency patches of local contrast normalized constant-Q spectra, on the order of one second, are transformed by a fully-convolutional network.
 Finding inspiration in the root-invariance strategy of GMM training, explicit weight-tying is achieved across roots such that all qualities develop the same internal representations, allowing the model to generalize to chords unseen during.
-
-DNN
+Taking inspiration from work in automatic speech recognition with deep networks, likelihood scaling is performed after training to control class bias resulting from the severe imbalance in the distribution of chords.
+Finally, chord posteriors are decoded via the classic Viterbi algorithm, common among ACE research.
 
 
 \subsection{Evaluation}
@@ -203,67 +218,151 @@ R_{W} = \frac{1}{S}\sum_{n=0}^{N-1}\int_{t=0}^{T_n}C(\mathcal{R}_n(t), \mathcal{
 S = \sum_{n=0}^{N-1}\int_{t=0}^{T_n}(\mathcal{R}_n(t), \mathcal{E}_n(t) \in \Re)~dt
 \end{equation}
 
-Defining the normalization term $S$ separately is useful when comparing chord names, as it relaxes the assumption that the comparison function is defined for all possible chords.
-Furthermore, setting the comparison function as a free variable allows for flexible evaluation of a system's outputs, and thus all emphasis can be placed on the choice of comparison function, $C$.
+Defining the normalization term $S$ separately is useful when comparing chord names, as it relaxes the assumption that the comparison function is defined over all time.
 In practice, this measure has been referred to as \emph{Weighted Chord Symbol Recall} (WCSR) \cite{Harte2010Towards}, \emph{Relative Correct Overlap} (TCO) \cite{McVicar2013Machine}, or \emph{Framewise Recognition Rate} \cite{Cho2014Improved}, but it is, most generally, a recall measure.
+Furthermore, setting the comparison function as a free variable allows for flexible evaluation of a system's outputs, and thus the focus on vocabulary can largely focus on the choice of comparison function, $C$.
+The work presented here leverages \texttt{mir\_eval}, an open source evaluation toolbox providing a suite of chord comparison functions;
+for more detail, we defer to \cite{Raffel2014Eval}.
 
-As discussed, most ACE research typically proceeds by mapping all chords into a smaller chord vocabulary, and using an enharmonic equivalence comparison function at evaluation, e.g. \texttt{C\#:maj} == \texttt{Db:maj}.
-Recently, this approach was generalized by the effort behind the open source evaluation toolbox, \texttt{mir\_eval} \cite{Raffel2014Eval}, introducing a suite of chord comparison functions.
-The seven rules considered here are summarized in Table \ref{tab:mir_eval}.
 
-\begin{table}[t]
-\begin{center}
-\caption{Chord comparison functions and examples in \texttt{mir\_eval}.}
-\label{tab:mir_eval}
-\begin{tabular}{l | c | c | c }
-Name & Equal & Inequal & Ignored \\
+\section{Experimental Setup}
+\label{sec:exp_setup}
+
+The ground truth collections are merged for training and evaluation, totaling 1235 tracks.
+Duplicates are then identified and removed to avoid potential data contamination during cross validation.
+Each recording is checked against the EchoNest Analyze API\footnote{\url{http://developer.echonest.com/docs/v4}} and associated with its track and song identifiers, corresponding to the recording and work, respectively.
+Uniqueness is defined at the level of a song ID to catch all possible conflicts, identifying 18 redundant tracks.
+All but one is dropped for each collision, preferred in the order of ``Isophonics'', ``Billboard'', and ``MARL'', resulting in a final count of 1217 unique tracks.
+
+For algorithmic parity, the two automatic systems addressed in Subsection \ref{subsec:systems} are trained with the same data partitions for 5-fold cross validation.
+Both adopt the same common chord vocabulary, comprised of the thirteen most frequent chord qualities in all twelve pitch classes, in addition to the no-chord class, as in \cite{Cho2014Improved}.
+Chords outside this strict vocabulary are ignored during training, rather than mapped to their nearest class approximation, as a means of exploring how the models generalize to such atypical instances.
+Performance across the seven comparison rules are averaged over the five test splits for all reference chord labels, given in Table \ref{tab:test_performance}.
+
+\begin{table}
+\scriptsize
+\centering
+\begin{tabular}{l||cc|c}
+Rule      & S(Ref, DNN) & S(Ref, kHMM) & S(kHMM, DNN) \\
 \hline
-Root & \texttt{G\#:aug}, \texttt{Ab:min} & \texttt{C:maj/5}, \texttt{G:maj} & -- \\
-Thirds & \texttt{A:maj}, \texttt{A:aug} & \texttt{C:maj7}, \texttt{C:min} & --\\
-Triads & \texttt{D:dim}, \texttt{D:hdim7} & \texttt{D:maj}, \texttt{D:aug} & -- \\
-Sevenths & \texttt{B:9}, \texttt{B:7} & \texttt{B:maj7}, \texttt{B:7} & \texttt{sus2}, \texttt{dim} \\
-Tetrads & \texttt{F:min7}, \texttt{F:min(b7)} & \texttt{F:dim7}, \texttt{F:hdim7} & -- \\
-majmin & \texttt{E:maj}, \texttt{E:maj7} & \texttt{E:maj}, \texttt{E:sus2} & \texttt{sus2}, \texttt{dim} \\
-MIREX & \texttt{C:maj6}, \texttt{A:min7} & \texttt{C:maj}, \texttt{A:min} \\
+root      & 0.7894      & 0.8075       & 0.8398       \\
+thirds    & 0.7570      & 0.7747       & 0.8148       \\
+majmin    & 0.7589      & 0.7761       & 0.7980       \\
+mirex     & 0.7691      & 0.7832       & 0.8060       \\
+triads    & 0.7048      & 0.7205       & 0.7827       \\
+sevenths  & 0.6197      & 0.6448       & 0.6913       \\
+tetrads   & 0.5672      & 0.5880       & 0.6779       \\
+v157      & 0.6493      & 0.6593       & 0.6779       \\
+
+
 \hline
 \end{tabular}
-\end{center}
+\caption{Average track performance across different comparison rules for the two models against the reference, as well as against each other.}
+\label{tab:test_performance}
 \end{table}
 
-The meaning of most rules may be clear from the table, but it is useful to describe each individually.
-The ``root'' comparison only considers the enharmonic root of a chord spelling.
-Comparison at ``thirds'' is based on the minor third scale degree, and is equivalent to the conventional mapping of all chords to their closest major-minor equivalent.
-In other words, a chord with a minor-third is minor, e.g. $\texttt{dim7} \to \texttt{min}$, and \emph{all} other chords map to major, e.g. $\texttt{sus2} \to \texttt{maj}$.
-The ``triads'' rule considers the first seven semitones of a chord spelling, encompassing the space of major, minor, augmented, and diminished chords.
-The ``sevenths'' rule is limited to major-minor chords and their tetrad extensions, i.e. major, minor, and dominants;
-chords outside this set are considered ``out-of-gamut'' and ignored.
-The ``tetrads'' comparison extends this to all chords contained within an octave, e.g. six chords and half-diminished sevenths.
-The ``Major-minor'' comparison is limited to major and minor chords alone;
-like ``sevenths'', other chords are ignored from evaluation.
-Unlike the other rules, ``MIREX'' compares chords at the pitch class level, and defines equivalence if three or four notes intersect.
-Comparing the pitch class composition of a chord allows for a slightly relaxed evaluation, allowing for misidentified roots and related chords.
-Finally, rules that ignore certain chords only do so when they occur in a reference annotation.
-In other words, an estimation is not held accountable for chords deemed to be out of gamut, but predicting such chords is still counted as an error.
+At first glance, the averaged statistics for each model against the reference annotations would seem to indicate that the two systems are roughly equivalent, with the kHMM system outperforming the DNN by a small margin.
+Unsurprisingly, the machine estimations perform best at the root level of accuracy,
+However, as shown by the comparing the estimations directly, these two systems behave quite differently.
+In fact, the two automatic systems agree with each other only slightly more than either does with the ground truth.
+Therefore, it will be valuable to not only investigate where the estimated chord sequences differ from the reference independently, but also how these estimated sequences differ from each other.
+
+\begin{table}
+\scriptsize
+\centering
+\begin{tabular}{l||c|cc}
+Rule      & (DT $|$ TdC) & (DT $|$ TdC, DNN) & (DT $|$ TdC, kHMM) \\
+\hline
+% root        & 0.9525 & 0.8045 & 0.8445 \\
+% thirds      & 0.9234 & 0.7672 & 0.7997 \\
+% majmin      & 0.9263 & 0.7445 & 0.7859 \\
+% mirex       & 0.9223 & 0.7588 & 0.7952 \\
+% triads      & 0.9174 & 0.7408 & 0.7806 \\
+% sevenths    & 0.8545 & 0.5633 & 0.6093 \\
+% tetrads     & 0.8457 & 0.5609 & 0.6045 \\
+% v157        & 0.8485 & 0.5607 & 0.6047 \\
+root        & 0.9318 & 0.7923 & 0.8353 \\
+thirds      & 0.9031 & 0.7500 & 0.7845 \\
+majmin      & 0.9054 & 0.7227 & 0.7657 \\
+mirex       & 0.9024 & 0.7373 & 0.7757 \\
+triads      & 0.8975 & 0.7186 & 0.7602 \\
+sevenths    & 0.8424 & 0.5424 & 0.5950 \\
+tetrads     & 0.8345 & 0.5395 & 0.5900 \\
+v157\_strict & 0.8381 & 0.5393 & 0.5903 \\
+\hline
+\end{tabular}
+\caption{Average performance across different comparison rules for the two human annotators, and the better match of each against the two automatic systems.}
+\label{tab:rc_performance}
+\end{table}
+
+Similar quantitative results can be measured for both systems over the Rock Corpus data, with two notable caveats.
+First, it is not immediately clear how to best synthesize the multiple perspectives into a single performance measure.
+As this work is more concerned with general trends than establishing state of the art benchmarks, the best matching reference-estimation pair is chosen for each track and averaged.
+Additionally, the vocabulary of chords used in the Rock Corpus is a much smaller subset of those used in ground truth dataset.
+This mismatch is reflected in Table \ref{tab:rc_performance}, where the average performance of the two automatic systems is lower due to the estimation of chords that do not exist in the reference annotations.
+Noting this difference, it will be a point of further exploration to identify any other discrepancies between datasets.
+
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{model_agreement-vs-best_est}
+\caption{Trackwise tetrad scores, illustrating model agreement versus the better matching estimation against reference annotations.}
+\label{fig:model_agreement}
+\end{figure}
+
+
+To gain deeper insight into system behavior at a more granular level, trackwise tetrad scores between estimations, a measure of model agreement, are compared against the better score of the two algorithms against the ground truth, a measure of general accuracy.
+Shown in Figure \ref{fig:model_agreement}, each track is represented as a point in coordinate space, with algorithmic agreement along the $x$-axis and best agreement with the ground truth annotations along the $y$-axis.
+Trackwise analysis can be particularly informative, as errors and other kinds of interesting behavior should be well-localized within a track, making it easier to draw broader conclusions from the data.
+Bisecting the plot horizontally and vertically yields four quadrants, enumerated I-IV in a counterclockwise manner starting from the upper right, each corresponding to a different kind of behavior:
+Quadrant I, $(x > 0.5, y > 0.5)$, where all annotations agree;
+Quadrant II, $(x < 0.5, y > 0.5)$, where one estimation matches the reference better than the other;
+Quadrant III, $(x < 0.5, y < 0.5)$, where all annotations disagree;
+and finally, Quadrant IV, $(x > 0.5, y < 0.5)$, where the estimations agree more with each other than the reference.
 
 
 
-\section{Observations, in Four Parts}\label{sec:typeset_text}
 
-Based on this analysis, a handful of instances are pulled out of the data and inspected more closely.
+
+
+Those observations aside, it is curious to note that there is considerable disagreement between the two expert human perspectives, with over $15\%$ in the tetrads comparison rule.
+This motivates a similar trackwise analysis as before, instead considering \emph{annotator} agreement versus the best matching estimation and reference, shown in Figure \ref{fig:annotator_agreement}.
+To form an analog comparison with Figure \ref{model_agreement}, only the kHMM estimations are considered here.
+% The interpretation of this plot is therefore similar as before, with
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{human_agreement-vs-best_kHMM_est}
+\caption{Annotator agreement versus the better matching human annotation against the kHMM estimations.}
+\label{fig:annotator_agreement}
+\end{figure}
+
+
+
+
+% Based on this analysis, a handful of instances are pulled out of the data and inspected more closely.
+
+
+
+\section{Data Analysis, in Four Parts}
+\label{sec:data_analysis}
+
+Using the trackwise plots to identify interesting datapoints worthy of qualitative inspection.
+Dig through the estimations, look at errors.
+Arrive at a variety of
+
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_annotations_mkup2}
+\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_legend}
+\caption{Six perspectives on ``I Saw Her Standing There'', by \emph{The Beatles}, according to Isophonics (Iso), Billboard (BB), David Temperley (DT), Trevor deClercq (TdC), the Deep Neural Network (DNN), and the k-stream HMM (kHMM).}
+\label{fig:beatles}
+\end{figure*}
 
 % Content Validity
-\subsection{Harmonic Validity}\label{subsec:body}
-
-Not all music is well described by chords.
-Because you \emph{can} annotate chords in a song, doesn't mean you should.
-Revolution 9, Beastie Boys, Fugees.
-These are not well described by chords, and introduce noise in the evaluation process.
-
-Alternatively, systems are sensitive to tuning.
-This is another easy way to pick up goose eggs during evaluation.
-While the outputs might be spot on and even useful to a human, sensitivity to absolute chord spelling fails to
-This motivates harmonic, Roman numeral analysis as a slightly different formulation of the task; decouple tuning from function.
-While not all chord datasets contain this information, Billboard and Isophonics do.
+\subsection{Harmonic Validity}
+\label{subsec:validity}
 
 Within the realm of all Western music, the use of harmony and chords has steadily evolved over time.
 Classically, music theorists have long sought to characterize musical works via analysis and reduction as a means to understanding, typically operating from a symbolic representations, i.e. a score.
@@ -277,9 +376,22 @@ An alternative approach to analysis, such as voice leading, might make more sens
 in others, such as ``math rock'', a lack of clearly structured harmonic content may arguably render the goal of harmonic analysis irrelevant \cite{Cateforis2002Alternative}.
 As genre is itself an amorphous and ill-defined concept, the degree to which a piece of music might be understood harmonically will vary, both absolutely and internally.
 
+Not all music is well described by chords.
+Because you \emph{can} annotate chords in a song, doesn't mean you should.
+Revolution 9, Love You To, Within You, Without You Beastie Boys (Brass Monkey), Fugees (Killing Me Softly), de la Soul, Sublime (Don't Push).
+These are not well described by chords, and introduce noise in the evaluation process.
+
+Alternatively, systems are sensitive to tuning.
+This is another easy way to pick up goose eggs during evaluation.
+While the outputs might be spot on and even useful to a human, sensitivity to absolute chord spelling fails to
+This motivates harmonic, Roman numeral analysis as a slightly different formulation of the task; decouple tuning from function.
+While not all chord datasets contain this information, Billboard and Isophonics do.
 
 
-\subsection{The Significance of Chord Representations}
+
+
+
+\subsection{Labels, Lexicons, \& the Limits of Flat Classification}
 
 % Syntax yo
 As discussed in \ref{sec:chord_syntax}, it is a particular nuance of chord notation that the space of valid spellings is effectively infinite.
@@ -303,35 +415,12 @@ Occurrence of bizarre chord spellings in the data:
 Should these even exist?
 
 
-\begin{table}[!t]
-% increase table row spacing, adjust to taste
-% \renewcommand{\arraystretch}{1.4}
-% if using array.sty, it might be a good idea to tweak the value of
-% \extrarowheight as needed to properly center the text within the cells
-\small
-\caption{Various real chord transcriptions for ``With or Without You'' by U2, comparing the reference annotation with six interpretations from a popular guitar tablature website; a raised asterisk indicates the transcription is given relative to a capo, and transposed to the actual key here.}
-\label{tab:wowu_chords}
-\centering
-\begin{tabular}{ c || c c c c | c c c c |}
-Ver. & \multicolumn{4}{c}{Chord Sequence} & Score & Ratings & Views \\
- \hline
-Ref. & \texttt{D:maj} & \texttt{D:maj/5} & \texttt{D:maj6/6} & \texttt{D:maj(4)/4} & --- & --- & --- \\
-\hline
-1 & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 4/5 & 193 & 1,985,878 \\
-2 & \texttt{D:5} & \texttt{A:sus4} & \texttt{B:min7} & \texttt{G:maj} & 5/5 & 11 & 184,611 \\
-$3^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 4/5 & 23 & 188,152 \\
-$4^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj7} & 4/5 & 14 & 84,825 \\
-$5^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 5/5 & 248 & 338,222 \\
-6 & \texttt{D:5} & \texttt{A:5} & \texttt{D:5/B} & \texttt{G:5} & 5/5 & 5 & 16,208 \\
-\hline
-\end{tabular}
-\end{table}
 
 Chords with bass intervals other than the root should be discarded from chord mapping strategies.
 Otherwise, this will only introduce noise.
 
 
-\subsection{The Internal Conflict between ``Recognition'' and ``Transcription''}
+\subsection{Conflicting Problem Definitions}
 
 The former is literal, the latter is anything but.
 In a recognition problem, silence is always no-chord, because nothing is playing.
@@ -344,79 +433,56 @@ Alternatively, there are plenty of instances in which annotators make transcript
 Nirvana -- all apologies.
 
 
-\subsection{``There is No Spoon,'' or the  }
+\subsection{``There is No Spoon,'' or Subjectivity in Chord Annotation}
 
-Known issue, Ni and company.
+Known issue, Ni and company \cite{Ni2013Understanding}.
 Not enough attention is being drawn to this observation.
 How can we objectively quantify a subjective task?
 
-Examples in the data
+\begin{table*}[!t]
+% increase table row spacing, adjust to taste
+% \renewcommand{\arraystretch}{1.4}
+% if using array.sty, it might be a good idea to tweak the value of
+% \extrarowheight as needed to properly center the text within the cells
+\small
+\centering
+\begin{tabular}{ c || c c c c | c c c c |}
+Ver. & \multicolumn{4}{c}{Chord Sequence} & Score & Ratings & Views \\
+ \hline
+ Billboard & \texttt{D:maj} & \texttt{A:sus4(b7)} & \texttt{B:min7} & \texttt{G:maj9} & --- & --- & --- \\
+ MARL & \texttt{D:maj} & \texttt{D:maj/5} & \texttt{D:maj6/6} & \texttt{D:maj(4)/4} & --- & --- & --- \\
+ DT & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & --- & --- & --- \\
+ TdC & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & --- & --- & --- \\
+\hline
+DNN & \texttt{D:maj} & \texttt{A:sus4} & \texttt{B:min7} & \texttt{G:maj7} & --- & --- & --- \\
+kHMM & \texttt{D:maj} & \texttt{A:sus4} & \texttt{B:min} & \texttt{G:maj} & --- & --- & --- \\
+\hline
+1 & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 4/5 & 193 & 1,985,878 \\
+2 & \texttt{D:5} & \texttt{A:sus4} & \texttt{B:min7} & \texttt{G:maj} & 5/5 & 11 & 184,611 \\
+$3^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 4/5 & 23 & 188,152 \\
+$4^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj7} & 4/5 & 14 & 84,825 \\
+$5^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 5/5 & 248 & 338,222 \\
+6 & \texttt{D:5} & \texttt{A:5} & \texttt{D:5/B} & \texttt{G:5} & 5/5 & 5 & 16,208 \\
+\hline
+\end{tabular}
+\caption{Various interpretations of the verse from ``With or Without You'' by \emph{U2}, comparing the reference annotations and automatic estimations with six interpretations from a popular guitar tablature website; a raised asterisk indicates the transcription is given relative to a capo, and transposed to the actual key here.}
+\label{tab:wowu_chords}
+\end{table*}
+
+With or Without You
+stuff and things
+
+
+% \begin{figure*}[t]
+% \centering
+% \includegraphics[width=0.9\textwidth]{rc_TRJAZCU14A0814BC9D_annotations}
+% \includegraphics[width=0.9\textwidth]{rc_TRJAZCU14A0814BC9D_legend}
+% \caption{``All Apologies'', by Nirvana -- An instance from the \emph{Rock Corpus}, illustrating the role subjectivity can play in annotation and evaluation.}
+% \label{fig:apologies}
+% \end{figure*}
 
 
 
-
-\section{First Level Headings}
-
-First level headings are in Times 10pt bold,
-centered with 1 line of space above the section head, and 1/2 space below it.
-For a section header immediately followed by a subsection header, the space should be merged.
-
-\subsection{Second Level Headings}
-
-Second level headings are in Times 10pt bold, flush left,
-with 1 line of space above the section head, and 1/2 space below it.
-The first letter of each significant word is capitalized.
-
-\subsubsection{Third and Further Level Headings}
-
-Third level headings are in Times 10pt italic, flush left,
-with 1/2 line of space above the section head, and 1/2 space below it.
-The first letter of each significant word is capitalized.
-
-Using more than three levels of headings is highly discouraged.
-
-
-\section{Footnotes and Figures}
-
-\subsection{Footnotes}
-
-Indicate footnotes with a number in the text.\footnote{This is a footnote.}
-Use 8pt type for footnotes. Place the footnotes at the bottom of the page on which they appear.
-Precede the footnote with a 0.5pt horizontal rule.
-
-\subsection{Figures, Tables and Captions}
-
-All artwork must be centered, neat, clean, and legible.
-All lines should be very dark for purposes of reproduction and art work should not be hand-drawn.
-The proceedings are not in color, and therefore all figures must make sense in black-and-white form.
-Figure and table numbers and captions always appear below the figure.
-Leave 1 line space between the figure or table and the caption.
-Each figure or table is numbered consecutively. Captions should be Times 10pt.
-Place tables/figures in text as close to the reference as possible.
-References to tables and figures should be capitalized, for example:
-see \figref{fig:example} and \tabref{tab:example}.
-Figures and tables may extend across both columns to a maximum width of 17.2cm.
-
-\begin{table}
- \begin{center}
- \begin{tabular}{|l|l|}
-  \hline
-  String value & Numeric value \\
-  \hline
-  Hello ISMIR  & \conferenceyear \\
-  \hline
- \end{tabular}
-\end{center}
- \caption{Table captions should be placed below the table.}
- \label{tab:example}
-\end{table}
-
-\begin{figure}
- \centerline{\framebox{
- \includegraphics[width=\columnwidth]{figure.png}}}
- \caption{Figure captions should be placed below the figure.}
- \label{fig:example}
-\end{figure}
 
 \section{Conclusions}
 

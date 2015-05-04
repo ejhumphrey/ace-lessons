@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import matplotlib.pyplot as plt
 from matplotlib.colors import hsv_to_rgb
 import mpld3
@@ -39,7 +40,8 @@ def trackwise_scatter(x, y, fig=None, ax=None, figsize=(8, 8),
     return fig, ax
 
 
-def chord_idx_to_colors(idx, max_idx=156, no_chord_idx=156, x_chord_idx=-1):
+def chord_idx_to_colors(idx, hue_offset=0, max_idx=156,
+                        no_chord_idx=156, x_chord_idx=-1):
     """Transform a chord class index to an (R, G, B) color.
 
     Parameters
@@ -58,16 +60,16 @@ def chord_idx_to_colors(idx, max_idx=156, no_chord_idx=156, x_chord_idx=-1):
     colors : np.ndarray, shape=(1, len(idx), 3)
         Matrix of color values.
     """
-    hue = (idx % 12) / 12.0
+    hue = ((idx + hue_offset) % 12) / 12.0
     value = 0.9 - 0.7*(((idx).astype(int) / 12) / (max_idx / 12.0))
     hsv = np.array([hue, (hue*0) + 0.6, value]).T
 
     hsv[idx == no_chord_idx, :] = np.array([0, 0.8, 0.0])
-    hsv[idx == x_chord_idx, :] = np.array([0.0, 0.0, 0.8])
+    hsv[idx == x_chord_idx, :] = np.array([0.0, 0.0, 0.5])
     return hsv_to_rgb(hsv.reshape(1, -1, 3))
 
 
-def labels_to_colors(labels, vocab='strict'):
+def labels_to_colors(labels, vocab='strict', **clrargs):
     """Transform a collection of labels to a color matrix.
 
     Parameters
@@ -82,11 +84,11 @@ def labels_to_colors(labels, vocab='strict'):
     """
     label_idx = np.array(VOCAB[vocab].label_to_index(labels))
     label_idx[np.equal(label_idx, None)] = -1
-    return chord_idx_to_colors(label_idx.astype(int))
+    return chord_idx_to_colors(label_idx.astype(int), **clrargs)
 
 
-def draw_color_legend(ax, labels, max_labels=20, min_ratio=0.005,
-                      vocab='strict'):
+def draw_color_legend(ax, labels, max_labels=18, min_ratio=0.0025,
+                      vocab='strict', **clrargs):
     """Transform a collection of labels to a color matrix.
 
     Parameters
@@ -105,8 +107,19 @@ def draw_color_legend(ax, labels, max_labels=20, min_ratio=0.005,
     counts = np.array([np.array([_ == y for _ in labels]).sum()
                        for y in unique_labels])
     sidx = np.argsort(counts)[::-1]
-    labels = unique_labels[sidx[:max_labels]]
-    colors = labels_to_colors(labels, vocab=vocab).squeeze()
+    sorted_labels = unique_labels[sidx]
+    sorted_idx = VOCAB[vocab].label_to_index(sorted_labels)
+
+    unique_idx = set()
+    labels = []
+    for label, idx in zip(sorted_labels, sorted_idx):
+        if idx in unique_idx and idx >= 0:
+            continue
+        unique_idx.add(idx)
+        labels.append(label)
+
+    colors = labels_to_colors(labels[:max_labels], vocab=vocab,
+                              **clrargs).squeeze()
     for n, (l, c) in enumerate(zip(labels, colors)):
         # print counts[sidx[n]], (counts[sidx[n]] / float(np.sum(counts)))
         if (counts[sidx[n]] / float(np.sum(counts))) < min_ratio:
@@ -121,8 +134,9 @@ def draw_color_legend(ax, labels, max_labels=20, min_ratio=0.005,
 
 
 def plot_annotations(annotations, names, plt_size=(11, 3),
-                     leg_size=(11, 1.25), vocab='strict',
-                     max_length=None, label_start=0):
+                     leg_size=(11, 1.25), vocab='strict', title='',
+                     max_length=None, label_start=0, max_labels=20,
+                     **clrargs):
     """
     Parameters
     ----------
@@ -142,7 +156,7 @@ def plot_annotations(annotations, names, plt_size=(11, 3),
         labels += [util.align_annotations(annotations[0], a)[1]
                    for a in annotations[2:]]
     else:
-        labels = util.align_annotations(annotations[0], annotations[0])[0]
+        labels = [util.align_annotations(annotations[0], annotations[0])[0]]
 
     if max_length:
         labels = [x[label_start:label_start + max_length] for x in labels]
@@ -153,9 +167,14 @@ def plot_annotations(annotations, names, plt_size=(11, 3),
     plt.yticks([])
     base_idx = 11 + 100*len(labels)
     for idx, (l, n) in enumerate(zip(labels, names)):
-        ax = figs[0].add_subplot(base_idx + idx)
-        ax.imshow(labels_to_colors(l, vocab=vocab),
-                  interpolation='nearest', aspect='auto')
+        if len(labels) == 1:
+            ax = figs[0].gca()
+        else:
+            ax = figs[0].add_subplot(base_idx + idx)
+        if idx == 0:
+            ax.set_title(title)
+        colors = labels_to_colors(l, vocab=vocab, **clrargs)
+        ax.imshow(colors, interpolation='nearest', aspect='auto')
         ax.set_ylabel(n)
         ax.set_xticks([])
         ax.set_yticks([])
@@ -166,6 +185,6 @@ def plot_annotations(annotations, names, plt_size=(11, 3),
     # Draw the legend
     figs += [plt.figure(figsize=leg_size)]
     ax = figs[-1].gca()
-    draw_color_legend(ax, labels, 20, vocab=vocab)
+    draw_color_legend(ax, labels, max_labels, vocab=vocab, **clrargs)
     plt.tight_layout()
     return figs
