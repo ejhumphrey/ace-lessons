@@ -91,64 +91,65 @@ Section \ref{}
 
 \section{ACE Research Methodology}
 
-A generic research methodology for content-based music informatics looks something like the following:
+Here we outline the conventional research methodology for ACE research, covering reference data collections, automatic system design, and evaluation.
 
-\begin{enumerate}
-\item Define the problem.
-\item Collect data accordingly.
-\item Build a solution.
-\item Evaluate the model.
-\item Iterate.
-\end{enumerate}
-
-
-\subsection{What is a ``chord''?}
-
-% Attempts to define a chord
-Despite their ubiquitous use in describing music, a practical definition of a chord is open to some interpretation.
-For example, \cite{McVicar2013Machine} collects three possible definitions:
-
-\begin{enumerate}
-\item \emph{Everyone agrees that \emph{chord} is used for a group of musical tones.}
-\item \emph{Two or more notes sounding simultaneously are known as a chord.}
-\item \emph{Three or more pitches sounded simultaneously or functioning as if sounded simultaneously.}
-\end{enumerate}
-
-% Pitch and notes
-\noindent Additionally, \cite{Harte2010Towards} expands the scope of (2) in order to describe \emph{all} tonal music, ``allow[ing] a chord to comprise zero or more notes.''
-The various flavors of definitions begs an obvious question:
-what makes the concept of a chord so hard to pin down?
-
-% % Chord composition
-% Much of this difficulty stems from the fact that the relative importance of the individual notes in a collection may change in different contexts.
-% In practice, a chord is named based on three, potentially subjective, criteria:
-% its root, its contributing intervals, and how these two relate to the perceived key.
-% The one invariant property shared by all definitions named previously is the idea that a pitch collection may be understood as a single harmonic object.
-% The time span over which this phenomena may unfold, however, is flexible.
-%Therefore, as will be shown shortly, a chord may take a different name if any of these decisions are changed or re-weighted.
-
-% Why is it so hard to define a chord? Let's look at some examples
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\columnwidth]{expanded_major}
-\includegraphics[width=0.6\columnwidth]{nonchord_tones}
-\caption{A stable F major chord played out over three time scales, as a true simultaneity, an arpeggiation, and four non-overlapping quarter notes; (bottom) a sustained C major chord is embellished by passing non-chord tones.}
-\label{fig:harmonic_objects}
-\end{figure}
-
-% Expanded over time leads to the same chord
-The inherent difficulty in defining a chord can be illustrated by two simple examples.
-Consider the two short phrases notated in Figure \ref{fig:harmonic_objects}.
-First, an \texttt{F:maj} chord is written as a true simultaneity, an arpeggiation, and as a series of non-overlapping quarter notes, respectively.
-Here, the degree of overlap in time is expanded until it no longer exists, and yet the collection of notes will continue to function as a coherent harmonic object.
-% True simultaneity doesn't always make a chord
-On the other hand, the simultaneous sounding of different notes does not necessarily give rise to the perception of different chords, where a major triad is sustained under the first several degrees of its scale.
-While three notes in the upper voice are contained in the \texttt{C:maj}, the others --the D, F, and A-- are referred to as ``nonchord'' tones.
-These incompatible notes are explained away in the overall harmonic scene, as they fall on metrically weak beats, are comparatively short in duration, and quickly move to notes that \emph{are} in the chord.
-%These embellishments do not contribute to the harmonic center of the phrase, and the bar can still be understood as a stable C major chord.
+% \begin{enumerate}
+% \item Define the problem.
+% \item Collect data accordingly.
+% \item Build a solution.
+% \item Evaluate the model.
+% \item Iterate.
+% \end{enumerate}
 
 
-\subsection{Data Collections}\label{subsec:data}
+% \subsection{What is a ``chord''?}
+
+% % Attempts to define a chord
+% Despite their ubiquitous use in describing music, a practical definition of a chord is open to some interpretation.
+% For example, \cite{McVicar2013Machine} collects three possible definitions:
+
+% \begin{enumerate}
+% \item \emph{Everyone agrees that \emph{chord} is used for a group of musical tones.}
+% \item \emph{Two or more notes sounding simultaneously are known as a chord.}
+% \item \emph{Three or more pitches sounded simultaneously or functioning as if sounded simultaneously.}
+% \end{enumerate}
+
+% % Pitch and notes
+% \noindent Additionally, \cite{Harte2010Towards} expands the scope of (2) in order to describe \emph{all} tonal music, ``allow[ing] a chord to comprise zero or more notes.''
+% The various flavors of definitions begs an obvious question:
+% what makes the concept of a chord so hard to pin down?
+
+% % % Chord composition
+% % Much of this difficulty stems from the fact that the relative importance of the individual notes in a collection may change in different contexts.
+% % In practice, a chord is named based on three, potentially subjective, criteria:
+% % its root, its contributing intervals, and how these two relate to the perceived key.
+% % The one invariant property shared by all definitions named previously is the idea that a pitch collection may be understood as a single harmonic object.
+% % The time span over which this phenomena may unfold, however, is flexible.
+% %Therefore, as will be shown shortly, a chord may take a different name if any of these decisions are changed or re-weighted.
+
+% % Why is it so hard to define a chord? Let's look at some examples
+% \begin{figure}[t]
+% \centering
+% \includegraphics[width=0.8\columnwidth]{expanded_major}
+% \includegraphics[width=0.6\columnwidth]{nonchord_tones}
+% \caption{A stable F major chord played out over three time scales, as a true simultaneity, an arpeggiation, and four non-overlapping quarter notes; (bottom) a sustained C major chord is embellished by passing non-chord tones.}
+% \label{fig:harmonic_objects}
+% \end{figure}
+
+% % Expanded over time leads to the same chord
+% The inherent difficulty in defining a chord can be illustrated by two simple examples.
+% Consider the two short phrases notated in Figure \ref{fig:harmonic_objects}.
+% First, an \texttt{F:maj} chord is written as a true simultaneity, an arpeggiation, and as a series of non-overlapping quarter notes, respectively.
+% Here, the degree of overlap in time is expanded until it no longer exists, and yet the collection of notes will continue to function as a coherent harmonic object.
+% % True simultaneity doesn't always make a chord
+% On the other hand, the simultaneous sounding of different notes does not necessarily give rise to the perception of different chords, where a major triad is sustained under the first several degrees of its scale.
+% While three notes in the upper voice are contained in the \texttt{C:maj}, the others --the D, F, and A-- are referred to as ``nonchord'' tones.
+% These incompatible notes are explained away in the overall harmonic scene, as they fall on metrically weak beats, are comparatively short in duration, and quickly move to notes that \emph{are} in the chord.
+% %These embellishments do not contribute to the harmonic center of the phrase, and the bar can still be understood as a stable C major chord.
+
+
+\subsection{Reference Data}
+\label{subsec:data}
 
 % Actually, how you define a chord doesn't really matter; this is implicitly a function of the data you use.
 In the absence of an explicit definition of a chord, one is adopted implicitly in the process of curating a set of chord annotations.
@@ -231,10 +232,8 @@ for more detail, we refer the curious reader to \cite{Raffel2014Eval}.
 \label{sec:exp_setup}
 
 The ground truth collections are merged for training and evaluation, totaling 1235 tracks.
-Duplicates are then identified and removed to avoid potential data contamination during cross validation.
-Each recording is checked against the EchoNest Analyze API\footnote{\url{http://developer.echonest.com/docs/v4}} and associated with its track and song identifiers, corresponding to the recording and work, respectively.
-Uniqueness is defined at the level of a song ID to catch all possible conflicts, identifying 18 redundant tracks.
-All but one is dropped for each collision, preferred in the order of ``Isophonics'', ``Billboard'', and ``MARL'', resulting in a final count of 1217 unique tracks.
+A total of 18 redundant songs are identified via the EchoNest Analyze API\footnote{\url{http://developer.echonest.com/docs/v4}} and removed to avoid potential data contamination during cross validation.
+All but one is dropped for each collision, preferring content from Isophonics, Billboard, and MARL, respectively, resulting in a final count of 1217 unique tracks.
 
 For algorithmic parity, the two automatic systems addressed in Subsection \ref{subsec:systems} are trained with the same data partitions for 5-fold cross validation.
 Both adopt the same common chord vocabulary, comprised of the thirteen most frequent chord qualities in all twelve pitch classes, in addition to the no-chord class, as in \cite{Cho2014Improved}.
@@ -288,13 +287,13 @@ In fact, the two automatic systems agree with each other only slightly more than
 Therefore, it will be valuable to not only investigate where the estimated chord sequences differ from the reference independently, but also how these estimated sequences differ from each other.
 
 
-Similarly, quantitative results are given for both systems over the Rock Corpus data in Table \ref{tab:rc_performance}, with two notable caveats.
+Similarly, quantitative results are given for both systems over the Rock Corpus data in Table \ref{tab:rc_performance}, with two caveats.
 First, it is not immediately clear how to best use multiple perspectives when evaluating the machine estimations.
 As this work is more concerned with general trends than establishing state of the art benchmarks, the best matching reference-estimation pair is chosen at the track level and used in the weighted average.
 Additionally, it should be noted that the vocabulary of chords used in the Rock Corpus reference annotations is a smaller subset than that produced by the models.
 This is likely reflected in the overall performance, where both systems achieve similar performance to the ground truth data at roots and thirds, but seem to fare far worse on the larger vocabulary metrics as result of over-estimating chords that could never be strictly right.
 These considerations aside, it is curious to observe a non-negligible degree of disagreement between the two human perspectives.
-Though hardly definitive, this helps establish a sense of what a natural performance ceiling might look like in ACE evaluation, with more than a $15\%$discrepancy in the tetrads condition.
+Though hardly definitive, this helps establish a sense of what a natural performance ceiling might look like in ACE evaluation, with more than a $15\%$ discrepancy in the tetrads condition.
 That said, these results also seem to indicate that there is certainly room for improvement in these systems.
 
 % Want to shine light on what these errors might be, and how to possibly improve them.
@@ -317,14 +316,6 @@ Errors and other kinds of noteworthy behavior should be well-localized within a 
 \caption{Trackwise recall for the ``tetrads'' rule over the Rock Corpus data, illustrating annotator agreement versus the better match between the two reference and kHMM annotations.}
 \label{fig:annotator_agreement}
 \end{figure}
-
-\begin{figure*}[t!]
-\centering
-\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_annotations_mkup2}
-\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_legend}
-\caption{Six perspectives on ``I Saw Her Standing There'', by \emph{The Beatles}, according to Isophonics (Iso), Billboard (BB), David Temperley (DT), Trevor deClercq (TdC), the Deep Neural Network (DNN), and the k-stream HMM (kHMM).}
-\label{fig:beatles}
-\end{figure*}
 
 
 % Ground truth trackwise
@@ -357,7 +348,14 @@ Using the trackwise plots to identify interesting datapoints worthy of qualitati
 Dig through the estimations, look at errors.
 Arrive at a variety of observations that are outlined here.
 
-A particularly dense example is given in Figure \ref{fig:beatles}, which happens to intersect the Isophonics, Billboard, and Rock Corpus datasets, resulting in four human and two machine estimations.
+
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_annotations_mkup2}
+\includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_legend}
+\caption{Six perspectives on ``I Saw Her Standing There'', by \emph{The Beatles}, according to Isophonics (Iso), Billboard (BB), David Temperley (DT), Trevor deClercq (TdC), the Deep Neural Network (DNN), and the k-stream HMM (kHMM).}
+\label{fig:beatles}
+\end{figure*}
 
 
 
@@ -365,7 +363,7 @@ A particularly dense example is given in Figure \ref{fig:beatles}, which happens
 \subsection{Harmonic Validity}
 \label{subsec:validity}
 
-For both Figures \ref{fig:model_agreement} and \ref{fig:model_agreement}, Quadrant III ---the condition where all annotations disagree--- serves to identify tracks that contribute a large source of error to overall performance, but on which no one can agree.
+For both Figures \ref{fig:model_agreement} and \ref{fig:annotator_agreement}, Quadrant III ---the condition where all annotations disagree--- serves to identify tracks that contribute a large source of error to overall performance, but on which no one can agree.
 Investigating these tracks further results in two general discoveries, both related to the notion of harmonic validity.
 
 % Alternatively, systems are sensitive to tuning.
@@ -391,51 +389,60 @@ This realization motivates the notion that the harmonic language of chords may n
 
 \subsection{Labels, Lexicons, \& the Limits of Flat Classification}
 
-% Syntax yo
-As discussed in \ref{sec:chord_syntax}, it is a particular nuance of chord notation that the space of valid spellings is effectively infinite.
-To constrain the complexity of the task at hand, ACE systems are traditionally designed to estimate chords from a finite \emph{vocabulary}, defined \emph{a priori}.
-This simplification reduces the chord estimation to a classification problem, where all observations are assigned to one of $K$ chord \emph{classes}.
+% Common manifestations in the data
+In exploring how these systems behave, another common source of error can be attributed to difficulties resulting from the comparison of related chords.
+By and large, ACE systems are typically forced to either map chords to a finite dictionary, or develop embedding rules for equivalence testing \cite{Raffel2014MIREval}.
+In either case, this quantization process assigns all observations to a one-of-$K$ representation, implicitly or otherwise, effectively making all errors equivalent.
+For the purposes of stable evaluation, this is can have subtle negative consequences.
 
-Comparing chords in label space is bonkers.
-Mappings or resolutions effectively quantize chords to a one-hot encoding.
-These can be thought of as mapping chords to bit vectors and then testing for equivalence.
-This is the wrong representation.
-
-One, chords are inherently hierarchical, and this approach to resolution discards these relationships.
-Flat classification problems ---those in which different classes are conceptually independent--- are built on the assumption of mutually exclusive relationships.
+Chords are inherently hierarchical, and cannot always be treated as distinct classes.
+Flat classification problems ---those in which different classes are independent--- are built on the assumption of mutually exclusive relationships.
 In other words, assignment to one class precludes the valid assignment to any other classes considered.
 For example, ``cat'' and ``dog'' are mutually exclusive classes of ``animal'', but ``cat'' and ``mammal'' are not.
-Returning to chords, \texttt{C:dim7} and \texttt{C:maj} are clearly mutually exclusive classes, but it is difficult to say the same of \texttt{C:maj7} and \texttt{C:maj}, as the former \emph{contains} the latter.
-
-Two, the flexibility of the standard Harte syntax can be abused for ambiguous chords, and it isn't clear what to do with these labels.
-
-Occurrence of bizarre chord spellings in the data:
-Should these even exist?
-
+In the space of chords, \texttt{C:dim7} and \texttt{C:maj} are obviously mutually exclusive classes, but it is difficult to say the same of \texttt{C:maj7} and \texttt{C:maj}, as the former \emph{contains} the latter.
+This conflict is a common source of disagreement between annotators of the Rock Corpus tracks, which are easily identified in or near the second quadrant of Figure \ref{fig:annotator_agreement}:
+for example, ``Dancing In The Street'' by Martha Reeves \& The Vandellas, ``All Apologies'' by \emph{Nirvana}, or ``Papa's Got a Brand New Bag'' by James Brown.
+In each case, the human perspectives each report related tetrads and triads, e.g. \texttt{E:7} and \texttt{E:maj}, causing low annotator agreement, while the machine estimation alternates between the two trying to represent both.
+These kinds of errors are not ``confusions'' in the classic sense, but a limitation of the model to represent naturally structured output, and of evaluation methods to reliably quantify this behavior.
 
 
-Chords with bass intervals other than the root should be discarded from chord mapping strategies.
-Otherwise, this will only introduce noise.
+% Alternatively, the flexibility of the standard chord syntax can be abused for ambiguous chords, and it isn't clear what to do with these labels.
+% Occurrence of bizarre chord spellings in the data:
+% Atypical chords often appear when the harmonic content isn't well described by chords.
+% de la soul, etc.
+% Hash pipe,
+% Should these annotations exist?
+% Unlikely that they will be used similarly by all annotators.
 
 
 \subsection{Conflicting Problem Definitions}
 
-The former is literal, the latter is anything but.
+Recognition is literal, whereas transcription is not.
 In a recognition problem, silence is always no-chord, because nothing is playing.
 Transcription, on the other hand, is attempting to assign labels to regions, and is closer to segmentation than classic approaches to chord estimation.
 It is easy to find instances of both in the data.
 
-Unfortunately, reference datasets contain annotations of both styles, and sometimes internally to the same annotation.
-Over-specified chords are mostly indicative of a recognition problem, and finds an ambiguous middle ground between harmonic analysis and pitch recognition.
-Alternatively, there are plenty of instances in which annotators make transcriptions decisions.
+
 Nirvana -- all apologies.
+Papa Roach, Last resort
+Weezer, El Scorcho
+
+Hierarchical at a segmentation level; need to partner with the segmentation folks.
+BMcFee work; Jordan Smith;
+Illustrated by ``With or Without You'' in the following section, subjectivity in annotation can derive from operating at different levels of annotations.
 
 
-\subsection{``There is No Spoon,'' or Subjectivity in Chord Annotation}
+\subsection{Ground Truth \emph{vs.} Subjectivity}
 
 Known issue, Ni and company \cite{Ni2013Understanding}.
 Not enough attention is being drawn to this observation.
 How can we objectively quantify a subjective task?
+
+
+% Beatles -- I saw her standing there.
+A particularly dense example is given in Figure \ref{fig:beatles}, which happens to intersect the Isophonics, Billboard, and Rock Corpus datasets, resulting in four human and two machine estimations.
+The DNN agrees with two humans, the kHMM model agrees with the other two.
+
 
 \begin{table*}[!t]
 % increase table row spacing, adjust to taste
@@ -467,22 +474,16 @@ $5^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 5/5 
 \label{tab:wowu_chords}
 \end{table*}
 
+
 With or Without You
-stuff and things
+Pedal D pad, moving bass motion.
+Two different levels of transcription.
+Relate back to public, user-generated transcriptions.
+Also provides a lens into the perspective preferred by a music community.
+Do chord evaluation metrics correlate with subjective experience?
 
 
-% \begin{figure*}[t]
-% \centering
-% \includegraphics[width=0.9\textwidth]{rc_TRJAZCU14A0814BC9D_annotations}
-% \includegraphics[width=0.9\textwidth]{rc_TRJAZCU14A0814BC9D_legend}
-% \caption{``All Apologies'', by Nirvana -- An instance from the \emph{Rock Corpus}, illustrating the role subjectivity can play in annotation and evaluation.}
-% \label{fig:apologies}
-% \end{figure*}
-
-
-
-
-\section{Conclusions}
+\section{Perspective for Future Work}
 
 In this work, the application of deep learning to large-vocabulary ACE is thoroughly explored, advancing the state of the art using standard evaluation methods.
 Arguably of more importance, both the behavior of the resulting systems and the data used for development are explored in rigorous detail.
@@ -498,7 +499,7 @@ Three, as championed by \cite{Mauch}, chord transcription would certainly seem t
 Lastly, the all-too-often subjective nature of chord labeling needs to be acknowledged in the process of curating reference data, and the human labeling task should average or combine multiple perspectives rather than attempt to yield canonical ``expert'' references.
 
 
-% \section{Citations}
+\section{Citations}
 
 % All bibliographical references should be listed at the end,
 % inside a section named ``REFERENCES,'' numbered and in alphabetical order.
@@ -509,24 +510,5 @@ Lastly, the all-too-often subjective nature of chord labeling needs to be acknow
 % For bibtex users:
 \bibliography{ISMIR2015template}
 
-% For non bibtex users:
-%\begin{thebibliography}{citations}
-%
-%\bibitem {Author:00}
-%E. Author.
-%``The Title of the Conference Paper,''
-%{\it Proceedings of the International Symposium
-%on Music Information Retrieval}, pp.~000--111, 2000.
-%
-%\bibitem{Someone:10}
-%A. Someone, B. Someone, and C. Someone.
-%``The Title of the Journal Paper,''
-%{\it Journal of New Music Research},
-%Vol.~A, No.~B, pp.~111--222, 2010.
-%
-%\bibitem{Someone:04} X. Someone and Y. Someone. {\it Title of the Book},
-%    Editorial Acme, Porto, 2012.
-%
-%\end{thebibliography}
 
 \end{document}
