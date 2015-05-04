@@ -104,8 +104,8 @@ A generic research methodology for content-based music informatics looks somethi
 \subsection{What is a ``chord''?}
 
 % Attempts to define a chord
-While a \emph{chord} is conceived as a simultaneous grouping of notes, a more practical definition of a ``chord'' is open to some interpretation.
-For example, \cite{McVicar2013Machine} collects three possible definitions, restated here:
+Despite their ubiquitous use in describing music, a practical definition of a chord is open to some interpretation.
+For example, \cite{McVicar2013Machine} collects three possible definitions:
 
 \begin{enumerate}
 \item \emph{Everyone agrees that \emph{chord} is used for a group of musical tones.}
@@ -114,7 +114,7 @@ For example, \cite{McVicar2013Machine} collects three possible definitions, rest
 \end{enumerate}
 
 % Pitch and notes
-Additionally, \cite{Harte2010Towards} expands the scope of (2) in order to describe \emph{all} tonal music, ``allow[ing] a chord to comprise zero or more notes.''
+\noindent Additionally, \cite{Harte2010Towards} expands the scope of (2) in order to describe \emph{all} tonal music, ``allow[ing] a chord to comprise zero or more notes.''
 The various flavors of definitions begs an obvious question:
 what makes the concept of a chord so hard to pin down?
 
@@ -147,7 +147,6 @@ These incompatible notes are explained away in the overall harmonic scene, as th
 %These embellishments do not contribute to the harmonic center of the phrase, and the bar can still be understood as a stable C major chord.
 
 
-
 \subsection{Data Collections}\label{subsec:data}
 
 Actually, how you define a chord doesn't really matter; this is implicitly a function of the data you use.
@@ -156,14 +155,16 @@ Definition of a chord and the chord annotations collected are indistinguishable.
 \subsubsection{Ground Truth Datasets}
 
 There are several chord annotation datasets available for research purposes.
-The first major effort to curate reference chord transcriptions, led by Harte in the mid-2000s, is referred to as the ``Isophonics'' dataset\footnote{\url{http://isophonics.net/content/reference-annotations}}.
-Initially covering the entire 180-song discography of The Beatles, it has been since been expanded with other content;
- 20 tracks by the band Queen, provided by Matthias Mauch.
-Two newer datasets were publicly released in 2011, offering a more diverse musical palette, one of over 700 tracks led by J. Ashley Burgoyne \cite{Burgoyne2011Expert} and another of 295 tracks led by Tae Min Cho, from the Music and Audio Research Lab (MARL) at NYU\footnote{{https://github.com/tmc323/Chord-Annotations}}.
-The former, referred to as ``Billboard'', employed a rigorous sampling and annotation process, selecting songs from Billboard magazine's ``Hot 100'' charts spanning more than three decades.
-The latter, referred to here as ``MARL'', consists of chord annotations performed by undergraduate music students for 195 tracks drawn from the USPop dataset\footnote{\url{http://labrosa.ee.columbia.edu/projects/musicsim/uspop2002.html}} and 100 tracks from the RWC-Pop collection\footnote{\url{https://staff.aist.go.jp/m.goto/RWC-MDB/rwc-mdb-p.html}}, in the hopes that sampling from common MIR datasets might facilitate access within the community.
-In all three cases, chord annotations are provided as ``ground truth'', on the premise that the annotations represent a gold standard perspective.
-% To this end, annotation efforts employed a review process, where the transcriptions of one or more annotators were verified by different individuals.
+The first major effort to curate reference chord annotations is referred to as the ``Isophonics'' dataset\footnote{\url{http://isophonics.net/content/reference-annotations}}.
+Initially covering the entire 180-song discography of The Beatles, it has since expanded slightly;
+of this additional content, 20 tracks by the band Queen are used here.
+Two other large chord annotation datasets were publicly released in 2011, offering a more diverse musical palette.
+The McGill \emph{Billboard} dataset consists of over 1000 annotations, of which more than 700 have been made public.
+This project employed a rigorous sampling and annotation process, selecting songs from Billboard magazine's ``Hot 100'' charts spanning more than three decades.
+The other, provided by the Music and Audio Research Lab (MARL) at NYU\footnote{\url{https://github.com/tmc323/Chord-Annotations}}, consists of 295 chord annotations performed by undergraduate music students;
+195 tracks are drawn from the USPop dataset\footnote{\url{http://labrosa.ee.columbia.edu/projects/musicsim/uspop2002.html}}, and 100 from the RWC-Pop collection\footnote{\url{https://staff.aist.go.jp/m.goto/RWC-MDB/rwc-mdb-p.html}}, in the hopes that leveraging common MIR datasets might facilitate access within the community.
+In all three cases, chord annotations are provided as ``ground truth,'' on the premise that the annotations represent the gold standard annotation.
+%, and as such, employed a review process, where the transcriptions of one or more annotators were verified by different individuals.
 
 
 \subsubsection{The Rock Corpus}
@@ -174,7 +175,7 @@ one, a pianist, and the other, a guitarist.
 % This insight into musical expertise adds an interesting dimension to the inquiry when attempting to understand alternate interpretations by the annotators.
 This collection of chord transcriptions has seen little use in the ACE literature, as its initial release lacked timing data for the transcriptions.
 A subsequent release fixed this issue, however, in addition to doubling the size of the collection.
-This dataset provides an opportunity to explore the behavior of ACE systems as a function of multiple reference transcriptions at a larger scale than previously considered.
+While previous efforts have sought to better understand the role of subjectivity in chord annotations \cite{Ni2013Understanding}, this dataset provides an opportunity to explore the behavior of ACE systems as a function of multiple reference transcriptions at a larger scale.
 
 
 \subsection{Automatic Systems}
@@ -187,7 +188,7 @@ These systems are reasonably different, and will hopefully provide different mac
 
 \subsubsection{K-stream GMM-HMM with Multiband Chroma}
 
-Following the lineage of automatic chord estimation systems, one system considered is that of \cite{Cho2014Improved}.
+Following the lineage of automatic chord estimation systems, one system considered is that of \cite{Cho2014Improved}, referred to here as ``kHMM.''
 A multiband chroma representation is computed from beat-synchronous audio analysis, producing four parallel chroma features.
 Each is fit to a separate Gaussian Mixture Model (GMM) by rotating all chroma vectors and chord labels to C.
 During inference, four separate observation likelihoods over all chord classes are obtained by circularly rotating the feature vector the GMM.
@@ -196,7 +197,7 @@ These four posteriors are then decoded jointly, using a k-stream HMM, resulting 
 
 \subsubsection{Deep Convolutional Neural Network}
 
-Acknowledging both the limited representational power of GMMs and a similar trend that occurred in automatic speech recognition, a deep convolutional network is also considered \cite{Humphrey2015Fully}.
+Acknowledging both the limited representational power of GMMs and a similar trend that occurred in automatic speech recognition, a deep convolutional network is also considered \cite{Humphrey2015Fully}, referred to as ``DNN.''
 Time-frequency patches of local contrast normalized constant-Q spectra, on the order of one second, are transformed by a fully-convolutional network.
 Finding inspiration in the root-invariance strategy of GMM training, explicit weight-tying is achieved across roots such that all qualities develop the same internal representations, allowing the model to generalize to chords unseen during.
 Taking inspiration from work in automatic speech recognition with deep networks, likelihood scaling is performed after training to control class bias resulting from the severe imbalance in the distribution of chords.
@@ -218,11 +219,10 @@ R_{W} = \frac{1}{S}\sum_{n=0}^{N-1}\int_{t=0}^{T_n}C(\mathcal{R}_n(t), \mathcal{
 S = \sum_{n=0}^{N-1}\int_{t=0}^{T_n}(\mathcal{R}_n(t), \mathcal{E}_n(t) \in \Re)~dt
 \end{equation}
 
-Defining the normalization term $S$ separately is useful when comparing chord names, as it relaxes the assumption that the comparison function is defined over all time.
-In practice, this measure has been referred to as \emph{Weighted Chord Symbol Recall} (WCSR) \cite{Harte2010Towards}, \emph{Relative Correct Overlap} (TCO) \cite{McVicar2013Machine}, or \emph{Framewise Recognition Rate} \cite{Cho2014Improved}, but it is, most generally, a recall measure.
+Defining the normalization term $S$ separately is useful when comparing chord names, as it relaxes the assumption that the comparison function is defined everywhere.
 Furthermore, setting the comparison function as a free variable allows for flexible evaluation of a system's outputs, and thus the focus on vocabulary can largely focus on the choice of comparison function, $C$.
 The work presented here leverages \texttt{mir\_eval}, an open source evaluation toolbox providing a suite of chord comparison functions;
-for more detail, we defer to \cite{Raffel2014Eval}.
+for more detail, we refer the curious reader to \cite{Raffel2014Eval}.
 
 
 \section{Experimental Setup}
@@ -237,13 +237,13 @@ All but one is dropped for each collision, preferred in the order of ``Isophonic
 For algorithmic parity, the two automatic systems addressed in Subsection \ref{subsec:systems} are trained with the same data partitions for 5-fold cross validation.
 Both adopt the same common chord vocabulary, comprised of the thirteen most frequent chord qualities in all twelve pitch classes, in addition to the no-chord class, as in \cite{Cho2014Improved}.
 Chords outside this strict vocabulary are ignored during training, rather than mapped to their nearest class approximation, as a means of exploring how the models generalize to such atypical instances.
-Performance across the seven comparison rules are averaged over the five test splits for all reference chord labels, given in Table \ref{tab:test_performance}.
+Performance across the seven comparison rules are averaged over the five test splits for \emph{all} reference chord labels, given in Table \ref{tab:test_performance}.
 
-\begin{table}
+\begin{table}[!t]
 \scriptsize
 \centering
 \begin{tabular}{l||cc|c}
-Rule      & S(Ref, DNN) & S(Ref, kHMM) & S(kHMM, DNN) \\
+Rule      & $R_W$(Ref, DNN) & $R_W$(Ref, kHMM) & $R_W$(kHMM, DNN) \\
 \hline
 root      & 0.7894      & 0.8075       & 0.8398       \\
 thirds    & 0.7570      & 0.7747       & 0.8148       \\
@@ -253,34 +253,18 @@ triads    & 0.7048      & 0.7205       & 0.7827       \\
 sevenths  & 0.6197      & 0.6448       & 0.6913       \\
 tetrads   & 0.5672      & 0.5880       & 0.6779       \\
 v157      & 0.6493      & 0.6593       & 0.6779       \\
-
-
 \hline
 \end{tabular}
-\caption{Average track performance across different comparison rules for the two models against the reference, as well as against each other.}
+\caption{Weighted recall across comparison rules between the ground truth references and both models, respectively, as well as against each other.}
 \label{tab:test_performance}
 \end{table}
 
-At first glance, the averaged statistics for each model against the reference annotations would seem to indicate that the two systems are roughly equivalent, with the kHMM system outperforming the DNN by a small margin.
-Unsurprisingly, the machine estimations perform best at the root level of accuracy,
-However, as shown by the comparing the estimations directly, these two systems behave quite differently.
-In fact, the two automatic systems agree with each other only slightly more than either does with the ground truth.
-Therefore, it will be valuable to not only investigate where the estimated chord sequences differ from the reference independently, but also how these estimated sequences differ from each other.
-
-\begin{table}
+\begin{table}[!t]
 \scriptsize
 \centering
 \begin{tabular}{l||c|cc}
-Rule      & (DT $|$ TdC) & (DT $|$ TdC, DNN) & (DT $|$ TdC, kHMM) \\
+Rule       & $R_W$(DT $|$ TdC) & $R_W$($\ast$, DNN) & $R_W$($\ast$, kHMM) \\
 \hline
-% root        & 0.9525 & 0.8045 & 0.8445 \\
-% thirds      & 0.9234 & 0.7672 & 0.7997 \\
-% majmin      & 0.9263 & 0.7445 & 0.7859 \\
-% mirex       & 0.9223 & 0.7588 & 0.7952 \\
-% triads      & 0.9174 & 0.7408 & 0.7806 \\
-% sevenths    & 0.8545 & 0.5633 & 0.6093 \\
-% tetrads     & 0.8457 & 0.5609 & 0.6045 \\
-% v157        & 0.8485 & 0.5607 & 0.6047 \\
 root        & 0.9318 & 0.7923 & 0.8353 \\
 thirds      & 0.9031 & 0.7500 & 0.7845 \\
 majmin      & 0.9054 & 0.7227 & 0.7657 \\
@@ -288,71 +272,86 @@ mirex       & 0.9024 & 0.7373 & 0.7757 \\
 triads      & 0.8975 & 0.7186 & 0.7602 \\
 sevenths    & 0.8424 & 0.5424 & 0.5950 \\
 tetrads     & 0.8345 & 0.5395 & 0.5900 \\
-v157\_strict & 0.8381 & 0.5393 & 0.5903 \\
+v157        & 0.8381 & 0.5393 & 0.5903 \\
 \hline
 \end{tabular}
-\caption{Average performance across different comparison rules for the two human annotators, and the better match of each against the two automatic systems.}
+\caption{Weighted recall across comparison rules for the two human annotators, and the better match of each against the two automatic systems.}
 \label{tab:rc_performance}
 \end{table}
 
-Similar quantitative results can be measured for both systems over the Rock Corpus data, with two notable caveats.
-First, it is not immediately clear how to best synthesize the multiple perspectives into a single performance measure.
-As this work is more concerned with general trends than establishing state of the art benchmarks, the best matching reference-estimation pair is chosen for each track and averaged.
-Additionally, the vocabulary of chords used in the Rock Corpus is a much smaller subset of those used in ground truth dataset.
-This mismatch is reflected in Table \ref{tab:rc_performance}, where the average performance of the two automatic systems is lower due to the estimation of chords that do not exist in the reference annotations.
-Noting this difference, it will be a point of further exploration to identify any other discrepancies between datasets.
+At first glance, the averaged statistics for each model against the reference annotations would seem to indicate that the two systems are roughly equivalent, with the kHMM system outperforming the DNN by a small margin.
+Unsurprisingly, the machine estimations perform best at the root recall, and drop as the comparison rules include greater specificity.
+However, as shown by the comparing the estimations in the third column, these two systems arrive at similar overall performance despite behaving quite differently.
+In fact, the two automatic systems agree with each other only slightly more than either does with the ground truth.
+Therefore, it will be valuable to not only investigate where the estimated chord sequences differ from the reference independently, but also how these estimated sequences differ from each other.
 
 
-\begin{figure}[t]
+Similarly, quantitative results are given for both systems over the Rock Corpus data in Table \ref{tab:rc_performance}, with two notable caveats.
+First, it is not immediately clear how to best use multiple perspectives when evaluating the machine estimations.
+As this work is more concerned with general trends than establishing state of the art benchmarks, the best matching reference-estimation pair is chosen at the track level and used in the weighted average.
+Additionally, it should be noted that the vocabulary of chords used in the Rock Corpus reference annotations is a smaller subset than that produced by the models.
+This is likely reflected in the overall performance, where both systems achieve similar performance to the ground truth data at roots and thirds, but seem to fare far worse on the larger vocabulary metrics as result of over-estimating chords that could never be strictly right.
+These considerations aside, it is curious to observe a non-negligible degree of disagreement between the two human perspectives.
+Though hardly definitive, this helps establish a sense of what a natural performance ceiling might look like in ACE evaluation, with more than a $15\%$discrepancy in the tetrads condition.
+That said, these results also seem to indicate that there is certainly room for improvement in these systems.
+
+% Want to shine light on what these errors might be, and how to possibly improve them.
+While overall recall gives a good general measure of system performance, we are particularly interested in developing a more nuanced understanding of how these systems behave.
+% but it is likely that they don't tell the whole story,
+% Therefore, it is necessary explore performance at a more granular level to untangle what factors contribute to these numbers.
+To these ends, it is useful to explore track-wise recall due to the strong relationship between chords and harmony internal to a song, reinforced further by the repetitive structure of music.
+As a result, errors will likely localize within tracks, and it will be easier to identify broader trends and problematic behaviors.
+Therefore, two track-wise performance graphs are produced to facilitate the exploration and further analysis of these systems.
+% Trackwise analysis can be particularly informative, as errors and other kinds of interesting behavior should be well-localized within a track, making it easier to draw broader conclusions from the data.
+
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{model_agreement-vs-best_est}
-\caption{Trackwise tetrad scores, illustrating model agreement versus the better matching estimation against reference annotations.}
+\caption{Trackwise recall for the ``tetrads'' rule over the ground truth data, illustrating \emph{model} agreement versus the better match between the reference and estimated annotations.}
 \label{fig:model_agreement}
 \end{figure}
 
-
-To gain deeper insight into system behavior at a more granular level, trackwise tetrad scores between estimations, a measure of model agreement, are compared against the better score of the two algorithms against the ground truth, a measure of general accuracy.
-Shown in Figure \ref{fig:model_agreement}, each track is represented as a point in coordinate space, with algorithmic agreement along the $x$-axis and best agreement with the ground truth annotations along the $y$-axis.
-Trackwise analysis can be particularly informative, as errors and other kinds of interesting behavior should be well-localized within a track, making it easier to draw broader conclusions from the data.
-Bisecting the plot horizontally and vertically yields four quadrants, enumerated I-IV in a counterclockwise manner starting from the upper right, each corresponding to a different kind of behavior:
-Quadrant I, $(x > 0.5, y > 0.5)$, where all annotations agree;
-Quadrant II, $(x < 0.5, y > 0.5)$, where one estimation matches the reference better than the other;
-Quadrant III, $(x < 0.5, y < 0.5)$, where all annotations disagree;
-and finally, Quadrant IV, $(x > 0.5, y < 0.5)$, where the estimations agree more with each other than the reference.
-
-
-
-
-
-
-Those observations aside, it is curious to note that there is considerable disagreement between the two expert human perspectives, with over $15\%$ in the tetrads comparison rule.
-This motivates a similar trackwise analysis as before, instead considering \emph{annotator} agreement versus the best matching estimation and reference, shown in Figure \ref{fig:annotator_agreement}.
-To form an analog comparison with Figure \ref{model_agreement}, only the kHMM estimations are considered here.
-% The interpretation of this plot is therefore similar as before, with
-
-\begin{figure}[t]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{human_agreement-vs-best_kHMM_est}
-\caption{Annotator agreement versus the better matching human annotation against the kHMM estimations.}
+\caption{Trackwise recall for the ``tetrads'' rule over the Rock Corpus data, illustrating annotator agreement versus the better match between the two reference and kHMM annotations.}
 \label{fig:annotator_agreement}
 \end{figure}
 
 
+% Ground truth trackwise
+First, leveraging the ground truth data, Figure \ref{fig:model_agreement} compares the agreement between machine estimations, along $x$, with the better estimated annotation for the given reference, along $y$.
+This comparison is motivated by a three-fold hypothesis:
+one, tracks that result in similar incorrect estimations present some kind of greater challenge, and it would be beneficial to know that might be;
+two, tracks that only one algorithm can get ``right'' contain understandable confusions;
+and three, tracks where both algorithms produce poor estimations, and yet \emph{neither} agree, are particularly curious and warrant further inspection.
+Partitioning the plot at its midpoints yields four quadrants, enumerated I-IV in a counterclockwise manner from the upper right, each corresponding to a different kind of behavior:
+Quadrant I, $(x > 0.5, y > 0.5)$, in which all annotations agree;
+Quadrant II, $(x < 0.5, y > 0.5)$, in which one estimation matches the reference better than the other;
+Quadrant III, $(x < 0.5, y < 0.5)$, in which all annotations disagree;
+and finally, Quadrant IV, $(x > 0.5, y < 0.5)$, in which the estimations agree more with each other than the reference.
+
+% Rock corpus
+A similar comparison is made over the Rock Corpus dataset, given in Figure \ref{fig:annotator_agreement}, where \emph{annotator} agreement, along $x$, is shown against the agreement of the best matching reference for a given estimation, along $y$.
+As an analog to the previous plot, only a single estimation (kHMM) is considered, offering a comparable three-part hypothesis:
+one, tracks with an estimated annotation that fails to match either human perspective likely identify room for improvement;
+two, annotator disagreement in the presence of a matching estimation highlights a subjective annotation;
+and three, disagreement between all annotations is suspicious and should be explored.
+A quadrant partition consistent with the previous plot yields a similar interpretation, exchanging dual estimations for dual references.
 
 
-% Based on this analysis, a handful of instances are pulled out of the data and inspected more closely.
 
-
-
-\section{Data Analysis, in Four Parts}
+\section{Understanding Performance, in Four Parts}
 \label{sec:data_analysis}
 
+Having built these two trackwise representations to help organize over 1400 tracks, we can now poke around and identify things.
 Using the trackwise plots to identify interesting datapoints worthy of qualitative inspection.
 Dig through the estimations, look at errors.
-Arrive at a variety of
+Arrive at a variety of observations that are outlined here.
 
+An example from Quandrant
 
-\begin{figure*}[t]
+\begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_annotations_mkup2}
 \includegraphics[width=\textwidth]{TROSSUK149E3AE03BD_legend}
