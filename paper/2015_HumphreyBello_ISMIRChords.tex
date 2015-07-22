@@ -9,6 +9,7 @@
 \usepackage{graphicx}
 \usepackage{color}
 \usepackage{cleveref}
+\usepackage{authblk}
 \usepackage{dsfont}
 
 \graphicspath{{figs/}}
@@ -19,34 +20,46 @@
 
 % Two addresses
 % --------------
-%\twoauthors
-%  {First author} {School \\ Department}
+% \twoauthors
+%  {Eric J. Humphrey} {MARL  \\ Department}
 %  {Second author} {Company \\ Address}
 
 % Three addresses
 % --------------
-\threeauthors
-  {First author} {Affiliation1 \\ {\tt author1@ismir.net}}
-  {Second author} {\bf Retain these fake authors in\\\bf submission to preserve the formatting}
-  {Third author} {Affiliation3 \\ {\tt author3@ismir.net}}
+% \threeauthors
+%   {First author} {Affiliation1 \\ {\tt author1@ismir.net}}
+%   {Second author} {\bf Retain these fake authors in\\\bf submission to preserve the formatting}
+%   {Third author} {Affiliation3 \\ {\tt author3@ismir.net}}
 
+\author[1,2]{Eric J. Humphrey}
+\author[1]{Juan P. Bello}
+\affil[1]{Music and Audio Research Laboratory, New York University}
+\affil[2]{MuseAmi, Inc.}
+
+\def\authorname{Eric J. Humphrey, Juan P. Bello}
 
 \begin{document}
 %
 \maketitle
 \sloppy
 %
+
+\let\oldthefootnote\thefootnote%
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{Please direct correspondence to \url{eric@museami.com}}
+\let\thefootnote\oldthefootnote%
+
 \begin{abstract}
 
-Automatic chord estimation (ACE) is now a hallmark research topic in content-based music informatics, but like many other tasks, system performance appears to be converging to yet another glass ceiling.
-Recently, two different large-vocabulary ACE systems were developed in the hopes that complex, data-driven models might significantly advance the state of the art.
-While arguably achieving some of the highest results to date, both approaches plateau at the same level, well short of having solved the problem.
-Therefore, this work explores the behavior of these two systems as a means of understanding obstacles and limitations in chord estimation, arriving at four critical observations:
+Automatic chord estimation (ACE) is a hallmark research topic in content-based music informatics, but like many other tasks, system performance appears to be converging to yet another glass ceiling.
+Looking toward trends in other machine perception domains, one might conclude that complex, data-driven methods have the potential to significantly advance the state of the art.
+Two recent efforts did exactly this for large-vocabulary ACE, but despite arguably achieving some of the highest results to date, both approaches plateau well short of having solved the problem.
+Therefore, this work explores the behavior of these two high performing,  systems as a means of understanding obstacles and limitations in chord estimation, arriving at four critical observations:
 one, music recordings that invalidate tacit assumptions about harmony and tonality result in erroneous and even misleading performance;
 two, standard lexicons and comparison methods struggle to reflect the natural relationships between chords;
 three, conventional approaches conflate the competing goals of recognition and transcription to some undefined degree;
 and four, the perception of chords in real music can be highly subjective, making the very notion of ``ground truth'' annotations tenuous.
-Synthesizing these observations, this paper offers possible remedies going forward, and concludes with some perspectives on the future of ACE research.
+Synthesizing these observations, this paper offers possible remedies going forward, and concludes with some perspectives on the future of both ACE research and the field at large.
 
 \end{abstract}
 
@@ -63,7 +76,7 @@ Given the prerequisite skill necessary to manually identify chords from recorded
 
 
 The goal of ACE research is ---or, at least, has been--- to develop systems that produce ``good'' time-aligned sequence of chords from a given music signal.
-Supplemented by efforts in data curation \cite{Burgoyne2011Expert}, syntax standardization \cite{Harte2005Symbolic}, and evaluation \cite{Pauwels2013Evaluating}, the bulk of chord estimation research has concentrated on building better systems, mostly converging to a common architecture \cite{Cho2014Improved}:
+Supplemented by efforts in data curation \cite{Burgoyne2011Expert}, syntax standardization \cite{Harte2005Symbolic}, and evaluation \cite{Pauwels2013Evaluating}, the bulk of chord estimation research has concentrated on building better systems, mostly converging to a common architecture \cite{Cho2014Relative}:
 %, diagrammed in Figure \ref{fig:basic_ace}
 first, harmonic features, referred to as pitch class profiles (PCP) or \emph{chroma}, are extracted from short-time observations of the audio signal \cite{Fujishima1999Realtime};
 these features may then be processed by any number of means, referred to in the literature as \emph{pre-filtering};
@@ -71,16 +84,15 @@ next, \emph{pattern matching} is performed independently over observations to me
 and finally, \emph{post-filtering} is applied to this chord class posterior, resulting in a sequence of chord labels over time.
 
 However, despite continued efforts to develop better features \cite{Mueller2010Towards}, more powerful classifiers \cite{Humphrey2012Rethinking}, or advanced post-filtering methods \cite{Boulanger2013Audio}, performance appears to be tapering off, as evidenced by recent years' results at MIReX\footnote{\url{http://www.music-ir.org/mirex/wiki/MIREX\_HOME}}.
-Acknowledging this situation %, an obvious question presents itself:
-begs an obvious question:
-% --- Fix this ---
-what is contributing to this trend, and what might be done about it?
+Thus, while other areas of machine perception, such as computer vision and speech recognition, are able to leverage modern advances in machine learning with remarkable success, two recent efforts in large vocabulary ACE were only able to realize modest improvements by comparison \cite{Cho2014Improved, Humphrey2015Exploration}.
+Acknowledging this situation begs an obvious question:
+why is automatic chord estimation different, and what might be done about it?
 % --- ---  --- ---
-The remainder of this paper is an effort to address this question:
-first, \Cref{sec:method} details the research methodology used here, covering the choice of automatic systems, objective evaluation, and the datasets considered;
-\Cref{sec:experiment} introduces a large-vocabulary chord estimation experiment and the corresponding high-level results;
-then, to develop a deeper understanding of how these systems behave and the kinds of errors that they make, \Cref{sec:analysis} identifies four critical insights, indicating that performance ceilings may be as much a function of traditional ACE methodology as the automatic systems being considered;
-finally, \Cref{sec:perspectives} offers perspectives to help frame future work.
+Through an investigation of system behaviour and detailed error analysis, the remainder of this paper is an effort to shed some light on the problem.
+% first, \Cref{sec:method} details the research methodology used here, covering the choice of automatic systems, objective evaluation, and the datasets considered;
+% \Cref{sec:experiment} introduces a large-vocabulary chord estimation experiment and the corresponding high-level results;
+% then, to develop a deeper understanding of how these systems behave and the kinds of errors that they make, \Cref{sec:analysis} identifies four critical insights, indicating that performance ceilings may be as much a function of traditional ACE methodology as the automatic systems being considered;
+% finally, \Cref{sec:perspectives} offers perspectives to help frame future work.
 
 
 \section{Research Methodology}
@@ -100,18 +112,18 @@ Additionally, these system architectures are quite different and should, as a re
 The first system considered is a modern, high-performing GMM/HMM chord estimation system \cite{Cho2014Improved}, referred to here as ``kHMM.''
 A multiband chroma representation is computed from beat-synchronous audio analysis, producing four parallel feature representations.
 Each is modeled by a separate multivariate Gaussian Mixture Model (GMM), whereby all chroma vectors and chord labels are rotated to a \texttt{C} root.
-During inference, four separate observation likelihoods over all chord classes are obtained by circularly rotating the feature vector the GMM, thereby empowering the model with transposition invariance.
+During inference, four separate observation likelihoods over all chord classes are obtained by circularly rotating the feature vector the GMM, thereby making the model transposition invariant.
 These four chord class posteriors are then decoded jointly using a k-stream HMM, resulting in a single beat-aligned chord sequence.
 
 
 \subsubsection{Deep Convolutional Neural Network}
 \label{subsubsec:DNN}
 
-Acknowledging both the limited representational power of GMMs and the recent widespread success of deep learning methods, a deep convolutional network is also considered \cite{Humphrey2015Fully}, referred to as ``DNN.''
+Acknowledging the recent widespread success of deep learning methods, a deep convolutional network is also considered \cite{Humphrey2015Exploration}, referred to as ``DNN.''
 Time-frequency patches of local contrast normalized constant-Q spectra, on the order of one second, are transformed by a four-layer convolutional network.
-Finding inspiration in the root-invariance strategy of GMM training, explicit weight-tying is achieved at the classifier across roots such that all qualities develop the same internal representations, allowing the model to generalize to chords unseen during.
+Finding inspiration in the root-invariance strategy of GMM training, explicit weight-tying is achieved at the classifier across roots such that all qualities develop the same internal representations, allowing the model to generalize to chords unseen during training.
 Following the lead of deep network research in automatic speech recognition, likelihood scaling is performed after training to control class bias resulting from the severe imbalance in the distribution of chords.
-Finally, chord posteriors are decoded via the basic Viterbi algorithm.
+Finally, chord posteriors are decoded via the Viterbi algorithm \cite{Cho2010Exploring}.
 
 
 \subsection{Evaluation}
@@ -161,7 +173,7 @@ In all three cases, chord annotations are provided as ``ground truth,'' on the p
 \subsubsection{The Rock Corpus}
 
 Importantly, the reference chord annotations discussed previously offer a  singular perspective, either as the output of one person or the result of a review process.
-The \emph{Rock Corpus}, alternatively, is a set of 200 popular rock tracks with time-aligned chord and melody transcriptions performed by two expert musicians \cite{deClercq2011Corpus}:
+The \emph{Rock Corpus}, on the other hand, is a set of 200 popular rock tracks with time-aligned chord and melody transcriptions performed by two expert musicians \cite{deClercq2011Corpus}:
 one, a pianist, and the other, a guitarist, referred to as DT and TdC, respectively.
 This collection of chord transcriptions has seen little use in the ACE literature, as its initial release lacked timing data for the transcriptions.
 A subsequent release resolved this issue, however, and doubled the size of the collection.
@@ -234,7 +246,7 @@ v157        & 0.838 & 0.539 & 0.590 \\
 Weighted recall is averaged over the five test splits are for all reference chord labels according to the seven \texttt{mir\_eval} comparison rules, shown in Table \ref{tab:test_performance}.
 At first glance, the overall statistics seem to indicate that the two systems are roughly equivalent, with ``kHMM'' outperforming ``DNN'' by a small margin.
 The automatic systems perform best at root-level recall, and performance drops as the comparison rules encompass more chords.
-Notably, as shown in the third column, these two systems do in indeed yield quite different estimations.
+Notably, a comparison of algorithmic estimations, given in the third column, shows that these two systems do indeed offer very different perspectives.
 Therefore, it will be valuable to not only investigate where the estimated chord sequences differ from the reference, but also how these estimated sequences differ from each other.
 
 Similarly, weighted recall is also given for both systems over the Rock Corpus in \Cref{tab:rc_performance}.
@@ -270,7 +282,7 @@ The former compares the agreement between multiple \emph{estimations}, along $x$
 (II), one estimation matches the reference better than the other;
 (III), all annotations disagree;
 and (IV), the estimations agree more with each other than the reference.
-Importantly, this track-wise comparison makes it easier to identify datapoints that can help address the original research questions.
+Importantly, this track-wise comparison makes it easier to identify datapoints that can help address our original research questions.
 Tracks for which only one algorithm performs well (II) likely indicate boundary chords.
 Alternatively, instances where both algorithms produce poor estimations, and yet \emph{neither} agree (III), are curious and warrant further inspection.
 Finally, tracks that result in similarly incorrect estimations (IV) highlight some kind of greater challenge to automatic systems.
@@ -288,7 +300,7 @@ Furthermore, tracks with an estimated annotation that fails to match either huma
 \label{sec:analysis}
 
 Using this suite of analysis tools described previously, a thorough exploration of the relationship between reference and estimated annotations is conducted, resulting in four significant insights.
-In the spirit of both reproducibility and open access, a companion IPython notebook is made available online\footnote{\url{http://github.com/username/demo.ipynb}}, providing additional visualizations complementary to the following discussion.
+In the spirit of both reproducibility and open access, a companion IPython notebook is made available online\footnote{\url{https://github.com/ejhumphrey/ace-lessons/experiments.ipynb}}, providing additional visualizations complementary to the following discussion.
 
 \begin{figure*}[t!]
 \centering
@@ -333,7 +345,7 @@ Flat classification problems ---i.e. those in which different classes are disjoi
 In other words, assignment to one class precludes the valid assignment to any other class considered.
 % For example, ``cat'' and ``dog'' are mutually exclusive classes of ``animal'', but ``cat'' and ``mammal'' are not.
 In the space of chords, \texttt{C:dim7} and \texttt{C:maj} are perhaps mutually exclusive classes, but it is difficult to say the same of \texttt{C:maj7} and \texttt{C:maj}, as the former \emph{contains} the latter.
-This conflict is a common source of disagreement between annotators of the Rock Corpus tracks, which are easily identified in or near the quadrant (II) of Figure \ref{fig:annotator_agreement}:
+This conflict is a common source of disagreement between annotators of the Rock Corpus tracks, which are easily identified in or near the quadrant (II) of Figure \ref{fig:trackwise_recall}-b:
 for example, ``Dancing In The Street'' by Martha Reeves \& The Vandellas, ``All Apologies'' by \emph{Nirvana}, or ``Papa's Got a Brand New Bag'' by James Brown.
 In each case, the human perspectives each report related tetrads and triads, e.g. \texttt{E:7} and \texttt{E:maj}, causing low annotator agreement, while the machine estimation alternates between the two trying to represent both.
 These kinds of errors are not ``confusions'' in the classic sense, but a limitation of evaluation methods to reliably quantify this behavior, and of the model to represent this naturally structured output.
@@ -400,35 +412,28 @@ $5^*$ & \texttt{D:maj} & \texttt{A:maj} & \texttt{B:min} & \texttt{G:maj} & 5/5 
 
 \subsection{Ground Truth \emph{vs.} Subjectivity}
 
-While the role that subjectivity can play in chord estimation is becoming better understood \cite{Ni2013Understanding}, it is not handled gracefully in current ACE methodology.
-To this point, there are two examples worth analyzing here, which intersect multiple datasets and provide several expert perspectives.
-% This influences both development and evaluation
-
-% Beatles -- I saw her standing there.
-%resulting in four human and two machine estimations.
+While the role that subjectivity can play in chord estimation is becoming better understood \cite{Ni2013Understanding}, it is not handled gracefully in current ACE methodology, and there are two examples worth analyzing here.
 The first, ``I Saw Her Standing There'' by \emph{The Beatles}, is given in Figure \ref{fig:beatles}, where the pitch class of the chord's root is mapped to color hue, and the darkness is a function of chord quality, e.g., all \texttt{E:*} chords are a shade of blue.
 No-chords are always black, and chords that do not fit into one of the 157 chord classes are shown in gray.
 Perhaps the most striking observation is the degree of variance between all annotations.
-Based on the tetrads comparison, no two annotations correspond to greater than a 65\% agreement, with the DNN and kHMM scoring 28\% and 52\% against the ground truth Isophonics reference, shown at the top.
+Based on the tetrads comparison, no two reference annotations correspond to greater than a 65\% agreement, with the DNN and kHMM scoring 28\% and 52\% against the ground truth Isophonics reference, shown at the top.
 Despite this low score, the DNN and kHMM estimations agree with at least one of the four human annotations 89.1\% and 92.3\% of the song, respectively.
 The two exceptions occur during the out-of-gamut chords, \texttt{E:7/3} and \texttt{A:min/b3}, which the DNN calls \texttt{Ab:hdim7} and \texttt{C:maj6}, respectively.
 While both estimated chords share three pitches with the Isophonics reference, the other human annotators mark the \texttt{A:min/b3} instead as a root position \texttt{C:maj}.
-Given how subjective it might be for human experts to agree on possible inversions, typical evaluation strategies may be placing too much emphasis on the correctness of an estimated chord's root.
+Given how subjective it might be for human experts to agree on possible inversions, typical evaluation strategies may place too much emphasis on the root of a chord.
 
 A second example to consider in the larger discussion of subjectivity is the verse of ``With or Without You'' by \emph{U2}.
 Musically, one finds reasonably ambiguous harmonic content, consisting of a vocal melody, a moving bass line, a guitar riff, and a string pad sustaining a high-pitched \texttt{D}.
-Complementing to the four expert perspectives provided here, an Internet search yields six additional guitar chord transcriptions from the website Ultimate Guitar\footnote{\url{http://tabs.ultimate-guitar.com/u/u2/with_or_without_you_crd.htm},  accessed 19 April 2015.}.
+Complementing the four expert perspectives provided here, an Internet search yields six additional user-generated chord transcriptions from the website Ultimate Guitar\footnote{\url{http://tabs.ultimate-guitar.com/u/u2/with_or_without_you_crd.htm}, accessed 19 April 2015.}.
 All human perspectives and both machine interpretations are consolidated in Table \ref{tab:wowu_chords}, noting both the average and number of ratings, as well as the number of views the public chord annotation has received.
-Though the view count is not directly indicative of a transcription's accuracy, it does provide a weak signal indicating that a large number of users did \emph{not} rate it negatively.
+Though view count is not directly indicative of a transcription's accuracy, it does provide a weak signal indicating that users did \emph{not} rate it negatively.
 
-In considering this particular example, there are a handful of takeaways to note.
-First, nearly all perspectives are equivalent at the major-minor level, with the exception of the MARL annotation, differing only slightly.
-That said, the differences between the public guitar chords do not noticeably impact the average ratings.
+This particular example provides several valuable insights.
+Nearly all perspectives are equivalent at the major-minor level, with the exception of the MARL annotation, which differs only slightly.
+That said, the differences between user-generated annotations do not noticeably impact the average ratings.
 This is an important consideration when building user systems, whereby objective measures are valuable insofar as they correlate with subjective experience.
-In a related vein, this specific community of musicians seems to show, at least for this song, a strong preference for root position chords.
-Therefore, subjectivity will likely play a role not only in the process of collecting reference annotations, but in the end-user experience as well.
-
-% Two different levels of transcription.
+Similarly, these annotations are indicative of, at least for this song, a preference for root position chords.
+Thus, subjectivity plays a role in the collection of reference annotations, as well as the end-user experience.
 
 
 \section{Conclusions and Future Perspectives}
@@ -440,24 +445,29 @@ two, conventional comparison methods struggle to accurately characterize the com
 three, conventional methodology has mixed the somewhat conflicting goals of chord transcription and recognition to an undefined degree;
 and four, the subjective nature of chord perception may render objective ground truth and evaluation untenable.
 
+% For chord estimation
+% * Subjectivity should be embraced
+% * Tagging is an option
+% * Parallels to segmentation
 Looking to the future of automatic chord estimation, a few opportunities stand out.
-First, given the parallels to segmentation, it seems chord transcription systems could benefit greatly from recent advances in music structure analysis.
-Additionally, subjectivity in the reference chord annotations should be embraced, rather than resolved.
-In the absence of objective truth, chord estimation is arguably more of a tagging problem than classification one, especially where larger vocabularies and inversions are concerned.
-% Adopting more of a tagging approach would also help lead to more stable evaluation, and
+First and foremost, subjectivity in reference annotations should be embraced rather than resolved.
+Chord estimation may be better understood as a time-aligned ``tagging'' problem, modeled as multinomial regression, or as structured prediction.
+Furthermore, synthesizing multiple human perspectives into a continuous-valued chord affinity vector would allow for more stable evaluation by encoding the degree to which a chord label applies to an observation.
+From a system design perspective, chord transcription, as a disctinct task, stands to benefit greatly from recent advances in music structure analysis.
+To the point, however, it is also crucial to distinguish between the different flavors of harmonic analysis, and how a collection of reference data does ---or does not--- reflect the specific problem being addressed.
 
-Finally, it would be advantageous to incorporate more subjective evaluation in standard chord estimation methodology.
-If nothing else, users studies can help identify objective measures that align well with subjective experience, and resolve issues of heuristically comparing chords.
-% How can we objectively quantify an algorithm's performance at a subjective task?
-More practically though, this feedback loop could be used to solicit human input at a larger scale, for additional perspectives on both new as well as previously annotated content.
-
-
-% Relate back to public, user-generated transcriptions.
-% Also provides a lens into the perspective preferred by a music community.
-% Build ACE systems to solicit feedback
-% Combine multiple chord labels
-% Leverage the internet for data
-
+% For content-based MIR
+% * Can't blindly throw powerful models at a problem; sometimes domain knowledge to understand what the system is doing and why.
+% * Subjective evaluation of MIR systems is necessary;
+% ** Make sure you haven't drifted from the goal
+% ** Don't lose sight of the things you're really trying to solve.
+% * Bootstrap good systems to collect more reference data; correction is often easier than open-ended annotation
+In a more general sense, this inquiry also has implications for the larger field of content-based MIR.
+Perhaps most presssing, the most powerful model cannot compensate for methodological deficiencies, and domain knowledge can be crucial to help understand system behaviour.
+Similarly, qualitative evaluation should play a larger role in the assessment of automatic systems intended for user-facing applications.
+If nothing else, users studies can help identify objective measures that align well with subjective experience.
+Finally, on a more practical note, high-performing systems can and should be used to facilitate the curation of reference annotations.
+These systems can be used to solicit human perspectives at a much larger scale, for both new and previously annotated content.
 
 
 \bibliography{library}
