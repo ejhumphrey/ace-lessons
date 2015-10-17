@@ -1,7 +1,11 @@
 from __future__ import print_function
+import argparse
 import json
 import jams
+import sys
 import time
+
+from joblib import Parallel, delayed
 
 
 def modernize_chord_annotation(annot):
@@ -17,31 +21,32 @@ def modernize_chord_annotation(annot):
                       confidence=1.0)
         data.append(record)
     return jams.Annotation(
-        namespace='chord', data=data, sandbox=annot['sandbox'],
-        annotation_metadata=annot['annotation_metadata'])
+        namespace='chord', data=data, sandbox=annot.get('sandbox', dict()),
+        annotation_metadata=annot.get('annotation_metadata', dict()))
 
 
-def modernize_chord_jam(jam):
+def modernize_chord_jam(key, jam):
     annots = [modernize_chord_annotation(adata)
               for adata in jam['chord']]
     file_metadata = jam['file_metadata'].copy()
     del file_metadata['jams_version']
     jam = jams.JAMS(annotations=annots, file_metadata=file_metadata,
-                    sandbox=jam['sandbox'])
-    return jams.JAMS.loads(jam.dumps())
+                    sandbox=jam.get('sandbox', {}))
+    return key, jams.JAMS.loads(jam.dumps())
 
 
-def modernize_jamset(jset, verbose=False):
-    newset = dict()
-    for count, (key, jdata) in enumerate(jset.iteritems()):
-        newset[key] = modernize_chord_jam(jdata)
-        if verbose:
-            print("[{0}] {1} / {2} \tFinished: {3}"
-                  "".format(time.asctime(), count, len(jset), key))
-    return newset
+def modernize_jamset(jset, parallel=False):
+    num_cpus = 1 if not parallel else -1
+    pool = Parallel(n_jobs=num_cpus)
+    fx = delayed(modernize_chord_jam)
+    return dict(pool(fx(k, j) for k, j in jset.iteritems()))
 
 
-def load_jamset_v2(filepath):
+def _deserialize(key, value):
+    return key, jams.JAMS.__json_init__(**value)
+
+
+def load_jamset_v2(filepath, parallel=False):
     """Load a collection of keyed JAMS (a JAMSet) into memory.
 
     Parameters
@@ -54,14 +59,21 @@ def load_jamset_v2(filepath):
     jamset : dict of JAMS
         Collection of JAMS objects under unique keys.
     """
+
     with open(filepath) as fp:
         raw_jams = json.load(fp)
 
-    # TODO: Use joblib to speed this up.
-    return dict((k, jams.JAMS.loads(v)) for k, v in raw_jams.iteritems())
+    num_cpus = 1 if not parallel else -1
+    pool = Parallel(n_jobs=num_cpus)
+    fx = delayed(_deserialize)
+    return dict(pool(fx(k, v) for k, v in raw_jams.iteritems()))
 
 
-def save_jamset_v2(jamset, filepath):
+def _serialize(key, jam):
+    return key, jam.__json__
+
+
+def save_jamset_v2(jamset, filepath, parallel=False):
     """Save a collection of keyed JAMS (a JAMSet) to disk.
 
     Parameters
@@ -69,8 +81,30 @@ def save_jamset_v2(jamset, filepath):
     jamset : dict of JAMS
         Collection of JAMS objects under unique keys.
     """
-    # TODO: Use joblib to speed this up.
-    output_data = dict((k, j.dumps()) for k, j in jamset.iteritems())
+    num_cpus = 1 if not parallel else -1
+    pool = Parallel(n_jobs=num_cpus)
+    fx = delayed(_serialize)
 
+    output_data = dict(pool(fx(k, j) for k, j in jamset.iteritems()))
     with open(filepath, 'w') as fp:
         json.dump(output_data, fp)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(usage=__doc__)
+    parser.add_argument("old_jamset",
+                        metavar="old_jamset", type=str,
+                        help="Path to an old jamset version.")
+    parser.add_argument("new_jamset",
+                        metavar="new_jamset", type=str,
+                        help="Path to the output (modern) jamset.")
+    parser.add_argument("--parallel",
+                        action='store_true',
+                        help="Path to a JSON file of CQT parameters.")
+    args = parser.parse_args()
+
+    print("[{0}] Starting...".format(time.asctime()))
+    jamset = modernize_jamset(json.load(open(args.old_jamset)),
+                              args.parallel)
+    save_jamset_v2(jamset, args.new_jamset, args.parallel)
+    print("[{0}] Finished!".format(time.asctime()))

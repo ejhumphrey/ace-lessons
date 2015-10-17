@@ -1,13 +1,18 @@
 import json
 import mir_eval
 import numpy as np
+import os
 import pandas as pd
+import pyjams
 import scipy.stats
 import time
 
 from itertools import groupby
 
-import pyjams
+
+def smakedirs(dpath):
+    if not os.path.exists(dpath):
+        os.makedirs(dpath)
 
 
 def timeprint(msg):
@@ -232,7 +237,13 @@ def load_jamset(filepath):
     jamset = dict()
     with open(filepath) as fp:
         for k, v in json.load(fp).iteritems():
-            jamset[k] = pyjams.JAMS(**v)
+            print k
+            try:
+                jamset[k] = pyjams.JAMS(**v)
+            except TypeError:
+                return v
+            except ValueError:
+                return v
 
     return jamset
 
@@ -260,7 +271,21 @@ def load_results(result_file):
     return pd.DataFrame(data['scores']), pd.DataFrame(data['supports'])
 
 
-def align_annotations(x, y, sample_size=0.1):
+def align_chord_annotations(x, y, sample_size=0.1):
+    """Align the labels of two jams range annotations.
+
+    Parameters
+    ----------
+    x, y : pyjams.RangeAnnotation
+        The two range annotations to align.
+    sample_size : scalar
+        Sampling hopsize, in seconds.
+
+    Returns
+    -------
+    x_labels, y_labels : lists
+        The corresponding labels sampled to the same time grid.
+    """
     y_labels = y.labels.value
     y_intervals = np.asarray(y.intervals)
     time_points, y_labels = mir_eval.util.intervals_to_samples(

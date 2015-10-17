@@ -1,4 +1,6 @@
-from . import lexicon
-from . import labels
-from . import util
-from . import visualize
+import lexicon
+import labels
+import util
+import visualize
+
+from util import load_jamset
