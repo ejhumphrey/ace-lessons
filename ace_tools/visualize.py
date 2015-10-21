@@ -152,11 +152,12 @@ def plot_annotations(annotations, names, plt_size=(11, 3),
 
     # Align all annotations
     if len(annotations) > 1:
-        labels = list(util.align_annotations(*annotations[:2]))
-        labels += [util.align_annotations(annotations[0], a)[1]
+        labels = list(util.align_chord_annotations(*annotations[:2]))
+        labels += [util.align_chord_annotations(annotations[0], a)[1]
                    for a in annotations[2:]]
     else:
-        labels = [util.align_annotations(annotations[0], annotations[0])[0]]
+        labels = [util.align_chord_annotations(annotations[0],
+                                               annotations[0])[0]]
 
     if max_length:
         labels = [x[label_start:label_start + max_length] for x in labels]

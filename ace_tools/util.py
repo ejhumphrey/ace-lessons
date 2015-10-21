@@ -1,9 +1,9 @@
+import jams
 import json
 import mir_eval
 import numpy as np
 import os
 import pandas as pd
-import pyjams
 import scipy.stats
 import time
 
@@ -221,7 +221,7 @@ def compress_samples_to_intervals(labels, time_points):
     return np.array(intervals), new_labels
 
 
-def load_jamset(filepath):
+def load_jamset_v1(filepath):
     """Load a collection of keyed JAMS (a JAMSet) into memory.
 
     Parameters
@@ -239,7 +239,7 @@ def load_jamset(filepath):
         for k, v in json.load(fp).iteritems():
             print k
             try:
-                jamset[k] = pyjams.JAMS(**v)
+                jamset[k] = jams.JAMS(**v)
             except TypeError:
                 return v
             except ValueError:
@@ -248,7 +248,7 @@ def load_jamset(filepath):
     return jamset
 
 
-def save_jamset(jamset, filepath):
+def save_jamset_v1(jamset, filepath):
     """Save a collection of keyed JAMS (a JAMSet) to disk.
 
     Parameters
@@ -257,7 +257,7 @@ def save_jamset(jamset, filepath):
         Collection of JAMS objects under unique keys.
     """
     output_data = dict()
-    with pyjams.JSONSupport():
+    with jams.JSONSupport():
         for k, jam in jamset.iteritems():
             output_data[k] = jam.__json__
 
@@ -286,10 +286,12 @@ def align_chord_annotations(x, y, sample_size=0.1):
     x_labels, y_labels : lists
         The corresponding labels sampled to the same time grid.
     """
-    y_labels = y.labels.value
-    y_intervals = np.asarray(y.intervals)
+    x_intervals, x_labels = x.data.to_interval_values()
+    y_intervals, y_labels = y.data.to_interval_values()
+
     time_points, y_labels = mir_eval.util.intervals_to_samples(
         y_intervals, y_labels, sample_size=sample_size, fill_value='N')
+
     x_labels = mir_eval.util.interpolate_intervals(
-        np.array(x.intervals), x.labels.value, time_points, fill_value='N')
+        x_intervals, x_labels, time_points, fill_value='N')
     return x_labels, y_labels

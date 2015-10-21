@@ -62,10 +62,10 @@ def align_chord_annotations(ref_annot, est_annot, transpose=False):
 
     Parameters
     ----------
-    ref_annot : pyjams.range_annotation
-        Range Annotation to use as a chord reference.
-    est_annot : pyjams.range_annotation
-        Range Annotation to use as a chord estimation.
+    ref_annot : JAMS.Annotation
+        Annotation to use as a chord reference.
+    est_annot : JAMS.Annotation
+        Annotation to use as a chord estimation.
     transpose : bool, default=False
         Transpose all chord pairs to the equivalent relationship in C.
 
@@ -78,11 +78,11 @@ def align_chord_annotations(ref_annot, est_annot, transpose=False):
     est_labels : list, shape=(m,)
         Estimated labels.
     """
+    ref_intervals, ref_labels = ref_annot.data.to_interval_values()
+    est_intervals, est_labels = est_annot.data.to_interval_values()
     durations, ref_labels, est_labels = align_labeled_intervals(
-        ref_intervals=np.asarray(ref_annot.intervals),
-        ref_labels=ref_annot.labels.value,
-        est_intervals=np.asarray(est_annot.intervals),
-        est_labels=est_annot.labels.value)
+        ref_intervals=ref_intervals, ref_labels=ref_labels,
+        est_intervals=est_intervals, est_labels=est_labels)
 
     if transpose:
         ref_labels, est_labels = L.relative_transpose(ref_labels, est_labels)

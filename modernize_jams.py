@@ -5,7 +5,7 @@ import json
 import os
 import time
 
-import convert_to_jamsv2 as J2
+import ace_tools.convert_to_jamsv2 as J2
 
 
 def process_one(idx, input_file, output_file, parallel):
