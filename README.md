@@ -27,6 +27,7 @@ For the demonstration code to see the library, you'll have to do one of the foll
 * Add it to your python path via `export PYTHONPATH=`pwd`:$PYTHONPATH`
 * Move / symlink it alongside other python libraries
 
-
+## Installation
+More details coming soon!
 
 
